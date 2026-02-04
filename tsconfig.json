@@ -1,5 +1,40 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "@tsconfig/bun/tsconfig.json",
-  "compilerOptions": {}
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitThis": true,
+    "noImplicitAny": true,
+    "useDefineForClassFields": true,
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "composite": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "noImplicitOverride": true,
+    "exactOptionalPropertyTypes": false,
+    "baseUrl": ".",
+    "paths": {
+      "@neocode-ai/domain/*": ["packages/neocode/src/domain/*"],
+      "@neocode-ai/application/*": ["packages/neocode/src/application/*"],
+      "@neocode-ai/infrastructure/*": ["packages/neocode/src/infrastructure/*"],
+      "@neocode-ai/presentation/*": ["packages/neocode/src/presentation/*"],
+      "@neocode-ai/ports/*": ["packages/neocode/src/ports/*"],
+      "@neocode-ai/shared/*": ["packages/neocode/src/shared/*"],
+      "@neocode-ai/util/*": ["packages/util/src/*"],
+      "@neocode-ai/ui/*": ["packages/ui/src/*"],
+      "@neocode-ai/sdk": ["packages/sdk/js/src"],
+      "@neocode-ai/sdk-v2": ["packages/sdk/js/src/v2"]
+    }
+  },
+  "include": ["src", "tests"],
+  "exclude": ["node_modules", "dist", "build", ".turbo"]
 }

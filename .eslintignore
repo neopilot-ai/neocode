@@ -1,0 +1,11 @@
+dist/
+build/
+node_modules/
+packages/*/gen/
+packages/sdk/js/src/v2/gen/
+packages/sdk/js/src/gen/
+.next/
+.turbo/
+coverage/
+*.tsbuildinfo
+.neocode/
