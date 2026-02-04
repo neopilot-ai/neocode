@@ -14,7 +14,7 @@ jobs:
       github.event.pull_request.user.login != 'kommander' &&
       github.event.pull_request.user.login != 'jayair' &&
       github.event.pull_request.user.login != 'fwang' &&
-      github.event.pull_request.user.login != 'adamdotdevin' &&
+      github.event.pull_request.user.login != 'neocodeai' &&
       github.event.pull_request.user.login != 'iamdavidhill' &&
       github.event.pull_request.user.login != 'neocode-agent[bot]'
     runs-on: blacksmith-4vcpu-ubuntu-2404

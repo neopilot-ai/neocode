@@ -54,7 +54,7 @@ const team = [
   "kommander",
   "jayair",
   "fwang",
-  "adamdotdevin",
+  "neocodeai",
   "iamdavidhill",
   "neocode-agent[bot]",
   "R44VC0RP",

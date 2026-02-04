@@ -2,7 +2,7 @@ Use this tool to assign and/or label a Github issue.
 
 You can assign the following users:
 - thdxr
-- adamdotdevin
+- neocodeai
 - fwang
 - jayair
 - kommander
@@ -27,7 +27,7 @@ Dax is responsible for managing core parts of the application, for large feature
 
 This relates to NeoCode server primarily but has overlap with just about anything
 
-### adamdotdevin
+### neocodeai
 
 Adam is responsible for managing the Desktop/Web app. If there is an issue relating to the desktop app or `neocode web` command. Assign him.
 
