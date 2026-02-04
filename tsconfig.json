@@ -21,7 +21,6 @@
     "isolatedModules": true,
     "noImplicitOverride": true,
     "exactOptionalPropertyTypes": false,
-    "baseUrl": ".",
     "paths": {
       "@neocode-ai/domain/*": ["packages/neocode/src/domain/*"],
       "@neocode-ai/application/*": ["packages/neocode/src/application/*"],
