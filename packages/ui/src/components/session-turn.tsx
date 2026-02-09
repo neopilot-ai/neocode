@@ -760,7 +760,7 @@ export function SessionTurn(
                             <div class="space-y-3">
                               <For each={messageDiffs().slice(0, store.diffLimit)}>
                                 {(diff, i) => {
-                                  const contentId = `diff-content-${i()}`
+                                  const contentId = `diff-content-${props.messageID}-${i()}`
                                   return (
                                     <div class="space-y-2">
                                       <button

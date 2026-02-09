@@ -133,7 +133,7 @@ To test locally:
 
 ### Issue comment event
 
-```
+```bash
 MOCK_EVENT='{"eventName":"issue_comment","repo":{"owner":"neopilot-ai","repo":"hello-world"},"actor":"fwang","payload":{"issue":{"number":4},"comment":{"id":1,"body":"hey neocode, summarize thread"}}}'
 ```
 
@@ -147,7 +147,7 @@ Replace:
 
 ### Issue comment with image attachment.
 
-```
+```bash
 MOCK_EVENT='{"eventName":"issue_comment","repo":{"owner":"neopilot-ai","repo":"hello-world"},"actor":"fwang","payload":{"issue":{"number":4},"comment":{"id":1,"body":"hey neocode, what is in my image ![Image](https://github.com/user-attachments/assets/xxxxxxxx)"}}}'
 ```
 
@@ -155,12 +155,12 @@ Replace the image URL `https://github.com/user-attachments/assets/xxxxxxxx` with
 
 ### PR comment event
 
-```
+```bash
 MOCK_EVENT='{"eventName":"issue_comment","repo":{"owner":"neopilot-ai","repo":"hello-world"},"actor":"fwang","payload":{"issue":{"number":4,"pull_request":{}},"comment":{"id":1,"body":"hey neocode, summarize thread"}}}'
 ```
 
 ### PR review comment event
 
-```
+```bash
 MOCK_EVENT='{"eventName":"pull_request_review_comment","repo":{"owner":"neopilot-ai","repo":"hello-world"},"actor":"fwang","payload":{"pull_request":{"number":7},"comment":{"id":1,"body":"hey neocode, add error handling","path":"src/components/Button.tsx","diff_hunk":"@@ -45,8 +45,11 @@\n- const handleClick = () => {\n-   console.log('clicked')\n+ const handleClick = useCallback(() => {\n+   console.log('clicked')\n+   doSomething()\n+ }, [doSomething])","line":47,"original_line":45,"position":10,"commit_id":"abc123","original_commit_id":"def456"}}}'
 ```

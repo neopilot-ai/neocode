@@ -8,8 +8,7 @@
     "jsxImportSource": "react",
     "types": [
       "@cloudflare/workers-types",
-      "node",
-      "@types/bun"
+      "node"
     ]
   }
 }
