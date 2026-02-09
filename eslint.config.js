@@ -85,6 +85,6 @@ export default [
     },
   },
   {
-    ignores: ["node_modules/**", "dist/**", "build/**", "coverage/**", "*.lock", "sst-env.d.ts"],
+    ignores: ["node_modules/**", "dist/**", "build/**", "coverage/**", "*.lock"],
   },
 ]
