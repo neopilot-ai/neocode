@@ -142,12 +142,7 @@ test("BrowserOpenFailed event is published when open() throws", async () => {
       await McpOAuthCallback.stop()
 
       // Wait for authenticate to reject (due to server stopping)
-      try {
-        await authPromise
-      } catch {
-        // Expected to fail
-      }
-
+      await expect(authPromise).rejects.toThrow("OAuth callback server stopped")
       unsubscribe()
 
       // Verify the BrowserOpenFailed event was published
@@ -196,11 +191,7 @@ test("BrowserOpenFailed event is NOT published when open() succeeds", async () =
       await McpOAuthCallback.stop()
 
       // Wait for authenticate to reject (due to server stopping)
-      try {
-        await authPromise
-      } catch {
-        // Expected to fail
-      }
+      await expect(authPromise).rejects.toThrow("OAuth callback server stopped")
 
       unsubscribe()
 
@@ -246,11 +237,7 @@ test("open() is called with the authorization URL", async () => {
       await McpOAuthCallback.stop()
 
       // Wait for authenticate to reject (due to server stopping)
-      try {
-        await authPromise
-      } catch {
-        // Expected to fail
-      }
+      await expect(authPromise).rejects.toThrow("OAuth callback server stopped")
 
       // Verify open was called with a URL
       expect(openCalledWith).toBeDefined()

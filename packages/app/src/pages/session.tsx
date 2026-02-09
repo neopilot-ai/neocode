@@ -869,7 +869,7 @@ export default function Page() {
         const sessionID = params.id
         if (!sessionID) return
         if (status()?.type !== "idle") {
-          await sdk.client.session.abort({ sessionID }).catch(() => {})
+          await sdk.client.session.abort({ sessionID }).catch(() => { })
         }
         const revert = info()?.revert?.messageID
         // Find the last user message that's not already reverted
@@ -952,69 +952,69 @@ export default function Page() {
     },
     ...(sync.data.config.share !== "disabled"
       ? [
-          {
-            id: "session.share",
-            title: language.t("command.session.share"),
-            description: language.t("command.session.share.description"),
-            category: language.t("command.category.session"),
-            slash: "share",
-            disabled: !params.id || !!info()?.share?.url,
-            onSelect: async () => {
-              if (!params.id) return
-              await sdk.client.session
-                .share({ sessionID: params.id })
-                .then((res) => {
-                  navigator.clipboard.writeText(res.data!.share!.url).catch(() =>
-                    showToast({
-                      title: language.t("toast.session.share.copyFailed.title"),
-                      variant: "error",
-                    }),
-                  )
-                })
-                .then(() =>
+        {
+          id: "session.share",
+          title: language.t("command.session.share"),
+          description: language.t("command.session.share.description"),
+          category: language.t("command.category.session"),
+          slash: "share",
+          disabled: !params.id || !!info()?.share?.url,
+          onSelect: async () => {
+            if (!params.id) return
+            await sdk.client.session
+              .share({ sessionID: params.id })
+              .then((res) => {
+                navigator.clipboard.writeText(res.data!.share!.url).catch(() =>
                   showToast({
-                    title: language.t("toast.session.share.success.title"),
-                    description: language.t("toast.session.share.success.description"),
-                    variant: "success",
-                  }),
-                )
-                .catch(() =>
-                  showToast({
-                    title: language.t("toast.session.share.failed.title"),
-                    description: language.t("toast.session.share.failed.description"),
+                    title: language.t("toast.session.share.copyFailed.title"),
                     variant: "error",
                   }),
                 )
-            },
+              })
+              .then(() =>
+                showToast({
+                  title: language.t("toast.session.share.success.title"),
+                  description: language.t("toast.session.share.success.description"),
+                  variant: "success",
+                }),
+              )
+              .catch(() =>
+                showToast({
+                  title: language.t("toast.session.share.failed.title"),
+                  description: language.t("toast.session.share.failed.description"),
+                  variant: "error",
+                }),
+              )
           },
-          {
-            id: "session.unshare",
-            title: language.t("command.session.unshare"),
-            description: language.t("command.session.unshare.description"),
-            category: language.t("command.category.session"),
-            slash: "unshare",
-            disabled: !params.id || !info()?.share?.url,
-            onSelect: async () => {
-              if (!params.id) return
-              await sdk.client.session
-                .unshare({ sessionID: params.id })
-                .then(() =>
-                  showToast({
-                    title: language.t("toast.session.unshare.success.title"),
-                    description: language.t("toast.session.unshare.success.description"),
-                    variant: "success",
-                  }),
-                )
-                .catch(() =>
-                  showToast({
-                    title: language.t("toast.session.unshare.failed.title"),
-                    description: language.t("toast.session.unshare.failed.description"),
-                    variant: "error",
-                  }),
-                )
-            },
+        },
+        {
+          id: "session.unshare",
+          title: language.t("command.session.unshare"),
+          description: language.t("command.session.unshare.description"),
+          category: language.t("command.category.session"),
+          slash: "unshare",
+          disabled: !params.id || !info()?.share?.url,
+          onSelect: async () => {
+            if (!params.id) return
+            await sdk.client.session
+              .unshare({ sessionID: params.id })
+              .then(() =>
+                showToast({
+                  title: language.t("toast.session.unshare.success.title"),
+                  description: language.t("toast.session.unshare.success.description"),
+                  variant: "success",
+                }),
+              )
+              .catch(() =>
+                showToast({
+                  title: language.t("toast.session.unshare.failed.title"),
+                  description: language.t("toast.session.unshare.failed.description"),
+                  variant: "error",
+                }),
+              )
           },
-        ]
+        },
+      ]
       : []),
   ])
 
@@ -1735,7 +1735,7 @@ export default function Page() {
   })
 
   return (
-    <div class="relative bg-background-base size-full overflow-hidden flex flex-col">
+    <div class="relative bg-[#050505] text-[#E0E0E0] size-full overflow-hidden flex flex-col font-mono">
       <SessionHeader />
       <div class="flex-1 min-h-0 flex flex-col md:flex-row">
         {/* Mobile tab bar */}
@@ -1770,7 +1770,7 @@ export default function Page() {
         {/* Session panel */}
         <div
           classList={{
-            "@container relative shrink-0 flex flex-col min-h-0 h-full bg-background-stronger": true,
+            "@container relative shrink-0 flex flex-col min-h-0 h-full bg-[#050505] border-r border-[#1A1A1A]": true,
             "flex-1 pt-6 md:pt-3": true,
             "md:flex-none": layout.fileTree.opened(),
           }}
@@ -2085,7 +2085,7 @@ export default function Page() {
           {/* Prompt input */}
           <div
             ref={(el) => (promptDock = el)}
-            class="absolute inset-x-0 bottom-0 pt-12 pb-4 flex flex-col justify-center items-center z-50 px-4 md:px-0 bg-gradient-to-t from-background-stronger via-background-stronger to-transparent pointer-events-none"
+            class="absolute inset-x-0 bottom-0 pt-12 pb-4 flex flex-col justify-center items-center z-50 px-4 md:px-0 bg-gradient-to-t from-[#050505] via-[#050505] to-transparent pointer-events-none"
           >
             <div
               classList={{
@@ -2182,7 +2182,7 @@ export default function Page() {
           <aside
             id="review-panel"
             aria-label={language.t("session.panel.reviewAndFiles")}
-            class="relative flex-1 min-w-0 h-full border-l border-border-weak-base flex"
+            class="relative flex-1 min-w-0 h-full border-l border-[#1A1A1A] bg-[#050505] flex"
           >
             <div class="flex-1 min-w-0 h-full">
               <Show
@@ -2199,6 +2199,7 @@ export default function Page() {
                     <Tabs value={activeTab()} onChange={openTab}>
                       <div class="sticky top-0 shrink-0 flex">
                         <Tabs.List
+                          class="!bg-[#0A0A0A] !border-b border-[#1A1A1A] !h-9 !rounded-none custom-scrollbar"
                           ref={(el: HTMLDivElement) => {
                             let scrollTimeout: number | undefined
                             let prevScrollWidth = el.scrollWidth
@@ -2257,12 +2258,13 @@ export default function Page() {
                           <Show when={contextOpen()}>
                             <Tabs.Trigger
                               value="context"
+                              class="!bg-[#0A0A0A] !border-r border-[#1A1A1A] !rounded-none !h-full px-4 group data-[selected]:!bg-[#1A1A1A] data-[selected]:!border-b-[#A3BE8C]"
                               closeButton={
                                 <Tooltip value={language.t("common.closeTab")} placement="bottom">
                                   <IconButton
                                     icon="close-small"
                                     variant="ghost"
-                                    class="h-5 w-5"
+                                    class="hidden group-hover:flex h-4 w-4 text-[#4A4A4A] hover:text-[#BF616A]"
                                     onClick={() => tabs().close("context")}
                                     aria-label={language.t("common.closeTab")}
                                   />
@@ -2271,7 +2273,7 @@ export default function Page() {
                               hideCloseButton
                               onMiddleClick={() => tabs().close("context")}
                             >
-                              <div class="flex items-center gap-2">
+                              <div class="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-tight">
                                 <SessionContextUsage variant="indicator" />
                                 <div>{language.t("session.tab.context")}</div>
                               </div>

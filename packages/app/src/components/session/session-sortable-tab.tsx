@@ -12,7 +12,7 @@ import { useCommand } from "@/context/command"
 
 export function FileVisual(props: { path: string; active?: boolean }): JSX.Element {
   return (
-    <div class="flex items-center gap-x-1.5 min-w-0">
+    <div class="flex items-center gap-x-2 min-w-0 font-mono">
       <FileIcon
         node={{ path: props.path, type: "file" }}
         classList={{
@@ -20,7 +20,7 @@ export function FileVisual(props: { path: string; active?: boolean }): JSX.Eleme
           "grayscale-0": props.active,
         }}
       />
-      <span class="text-14-medium truncate">{getFilename(props.path)}</span>
+      <span class="text-[11px] font-bold truncate tracking-tight">{getFilename(props.path)}</span>
     </div>
   )
 }
@@ -34,9 +34,10 @@ export function SortableTab(props: { tab: string; onTabClose: (tab: string) => v
   return (
     // @ts-ignore
     <div use:sortable classList={{ "h-full": true, "opacity-0": sortable.isActiveDraggable }}>
-      <div class="relative h-full">
+      <div class="relative h-full flex items-center">
         <Tabs.Trigger
           value={props.tab}
+          class="!bg-[#0A0A0A] !border-[#1A1A1A] !rounded-none !h-full px-4 group data-[selected]:!bg-[#1A1A1A] data-[selected]:!border-b-[#A3BE8C]"
           closeButton={
             <TooltipKeybind
               title={language.t("common.closeTab")}
@@ -46,7 +47,7 @@ export function SortableTab(props: { tab: string; onTabClose: (tab: string) => v
               <IconButton
                 icon="close-small"
                 variant="ghost"
-                class="h-5 w-5"
+                class="hidden group-hover:flex h-4 w-4 text-[#4A4A4A] hover:text-[#BF616A]"
                 onClick={() => props.onTabClose(props.tab)}
                 aria-label={language.t("common.closeTab")}
               />

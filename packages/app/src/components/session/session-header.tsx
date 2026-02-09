@@ -130,18 +130,18 @@ export function SessionHeader() {
           <Portal mount={mount()}>
             <button
               type="button"
-              class="hidden md:flex w-[320px] max-w-full min-w-0 p-1 pl-1.5 items-center gap-2 justify-between rounded-md border border-border-weak-base bg-surface-raised-base transition-colors cursor-default hover:bg-surface-raised-base-hover focus-visible:bg-surface-raised-base-hover active:bg-surface-raised-base-active"
+              class="hidden md:flex w-[320px] max-w-full min-w-0 px-3 py-1 items-center gap-2 justify-between rounded-sm border border-[#1A1A1A] bg-[#050505] transition-all cursor-default hover:border-[#A3BE8C]/50 focus-visible:border-[#A3BE8C]"
               onClick={() => command.trigger("file.open")}
               aria-label={language.t("session.header.searchFiles")}
             >
               <div class="flex min-w-0 flex-1 items-center gap-2 overflow-visible">
-                <Icon name="magnifying-glass" size="normal" class="icon-base shrink-0" />
-                <span class="flex-1 min-w-0 text-14-regular text-text-weak truncate h-4.5 flex items-center">
+                <span class="text-[#A3BE8C] text-[10px] font-bold">$</span>
+                <span class="flex-1 min-w-0 text-[11px] font-mono text-[#4A4A4A] truncate h-4.5 flex items-center">
                   {language.t("session.header.search.placeholder", { project: name() })}
                 </span>
               </div>
 
-              <Show when={hotkey()}>{(keybind) => <Keybind class="shrink-0">{keybind()}</Keybind>}</Show>
+              <Show when={hotkey()}>{(keybind) => <span class="text-[9px] text-[#2A2A2A] font-mono uppercase tracking-widest">{keybind()}</span>}</Show>
             </button>
           </Portal>
         )}
@@ -149,7 +149,7 @@ export function SessionHeader() {
       <Show when={rightMount()}>
         {(mount) => (
           <Portal mount={mount()}>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-4 font-mono">
               <StatusPopover />
               <Show when={showShare()}>
                 <div class="flex items-center">
@@ -163,17 +163,17 @@ export function SessionHeader() {
                     gutter={6}
                     placement="bottom-end"
                     shift={-64}
-                    class="rounded-xl [&_[data-slot=popover-close-button]]:hidden"
+                    class="rounded-sm bg-[#0A0A0A] border border-[#1A1A1A] text-[#E0E0E0] [&_[data-slot=popover-close-button]]:hidden"
                     triggerAs={Button}
                     triggerProps={{
                       variant: "secondary",
-                      class: "rounded-sm h-[24px] px-3",
+                      class: "rounded-sm h-[24px] px-3 bg-[#1A1A1A] text-[10px] border-[#2A2A2A] hover:bg-[#2A2A2A] text-[#E0E0E0] uppercase tracking-widest",
                       classList: { "rounded-r-none": shareUrl() !== undefined },
                       style: { scale: 1 },
                     }}
                     trigger={language.t("session.share.action.share")}
                   >
-                    <div class="flex flex-col gap-2">
+                    <div class="flex flex-col gap-2 p-4">
                       <Show
                         when={shareUrl()}
                         fallback={
@@ -181,7 +181,7 @@ export function SessionHeader() {
                             <Button
                               size="large"
                               variant="primary"
-                              class="w-1/2"
+                              class="w-full bg-[#A3BE8C] text-[#050505] text-[10px] font-bold uppercase tracking-widest"
                               onClick={shareSession}
                               disabled={state.share}
                             >
@@ -193,12 +193,12 @@ export function SessionHeader() {
                         }
                       >
                         <div class="flex flex-col gap-2">
-                          <TextField value={shareUrl() ?? ""} readOnly copyable tabIndex={-1} class="w-full" />
+                          <TextField value={shareUrl() ?? ""} readOnly copyable tabIndex={-1} class="w-full bg-[#050505] border-[#1A1A1A] text-[10px]" />
                           <div class="grid grid-cols-2 gap-2">
                             <Button
                               size="large"
                               variant="secondary"
-                              class="w-full shadow-none border border-border-weak-base"
+                              class="w-full shadow-none border border-[#1A1A1A] bg-transparent text-[9px] uppercase tracking-widest text-[#4A4A4A] hover:text-[#E0E0E0]"
                               onClick={unshareSession}
                               disabled={state.unshare}
                             >
@@ -209,7 +209,7 @@ export function SessionHeader() {
                             <Button
                               size="large"
                               variant="primary"
-                              class="w-full"
+                              class="w-full bg-[#E0E0E0] text-[#050505] text-[9px] uppercase tracking-widest font-bold"
                               onClick={viewShare}
                               disabled={state.unshare}
                             >
@@ -233,7 +233,7 @@ export function SessionHeader() {
                       <IconButton
                         icon={state.copied ? "check" : "link"}
                         variant="secondary"
-                        class="rounded-l-none"
+                        class="rounded-l-none h-[24px] bg-[#1A1A1A] border-[#2A2A2A] text-[#4A4A4A] hover:text-[#E0E0E0]"
                         onClick={copyLink}
                         disabled={state.unshare}
                         aria-label={
@@ -246,66 +246,39 @@ export function SessionHeader() {
                   </Show>
                 </div>
               </Show>
-              <div class="hidden md:flex items-center gap-3 ml-2 shrink-0">
+              <div class="hidden md:flex items-center gap-4 shrink-0">
                 <TooltipKeybind
                   title={language.t("command.terminal.toggle")}
                   keybind={command.keybind("terminal.toggle")}
                 >
                   <Button
                     variant="ghost"
-                    class="group/terminal-toggle size-6 p-0"
+                    class="group/terminal-toggle size-6 p-0 text-[#4A4A4A] hover:text-[#88C0D0]"
                     onClick={() => view().terminal.toggle()}
                     aria-label={language.t("command.terminal.toggle")}
                     aria-expanded={view().terminal.opened()}
                     aria-controls="terminal-panel"
                   >
-                    <div class="relative flex items-center justify-center size-4 [&>*]:absolute [&>*]:inset-0">
-                      <Icon
-                        size="small"
-                        name={view().terminal.opened() ? "layout-bottom-full" : "layout-bottom"}
-                        class="group-hover/terminal-toggle:hidden"
-                      />
-                      <Icon
-                        size="small"
-                        name="layout-bottom-partial"
-                        class="hidden group-hover/terminal-toggle:inline-block"
-                      />
-                      <Icon
-                        size="small"
-                        name={view().terminal.opened() ? "layout-bottom" : "layout-bottom-full"}
-                        class="hidden group-active/terminal-toggle:inline-block"
-                      />
-                    </div>
+                    <Icon
+                      size="small"
+                      name={view().terminal.opened() ? "layout-bottom-full" : "layout-bottom"}
+                    />
                   </Button>
                 </TooltipKeybind>
-              </div>
-              <div class="hidden md:block shrink-0">
+
                 <TooltipKeybind title={language.t("command.review.toggle")} keybind={command.keybind("review.toggle")}>
                   <Button
                     variant="ghost"
-                    class="group/file-tree-toggle size-6 p-0"
+                    class="group/file-tree-toggle size-6 p-0 text-[#4A4A4A] hover:text-[#B48EAD]"
                     onClick={() => layout.fileTree.toggle()}
                     aria-label={language.t("command.review.toggle")}
                     aria-expanded={layout.fileTree.opened()}
                     aria-controls="review-panel"
                   >
-                    <div class="relative flex items-center justify-center size-4 [&>*]:absolute [&>*]:inset-0">
-                      <Icon
-                        size="small"
-                        name={layout.fileTree.opened() ? "layout-right-full" : "layout-right"}
-                        class="group-hover/file-tree-toggle:hidden"
-                      />
-                      <Icon
-                        size="small"
-                        name="layout-right-partial"
-                        class="hidden group-hover/file-tree-toggle:inline-block"
-                      />
-                      <Icon
-                        size="small"
-                        name={layout.fileTree.opened() ? "layout-right" : "layout-right-full"}
-                        class="hidden group-active/file-tree-toggle:inline-block"
-                      />
-                    </div>
+                    <Icon
+                      size="small"
+                      name={layout.fileTree.opened() ? "layout-right-full" : "layout-right"}
+                    />
                   </Button>
                 </TooltipKeybind>
               </div>

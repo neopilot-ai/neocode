@@ -11,6 +11,12 @@ describe("file.ripgrep", () => {
         await Bun.write(path.join(dir, "visible.txt"), "hello")
         await fs.mkdir(path.join(dir, ".neocode"), { recursive: true })
         await Bun.write(path.join(dir, ".neocode", "thing.json"), "{}")
+
+        // Debugging: Run rg --files directly in the temp directory
+        const rgPath = await Ripgrep.filepath()
+        const proc = Bun.spawn([rgPath, "--files"], { cwd: dir })
+        const result = await new Response(proc.stdout).text()
+        console.log("rg --files output:", result)
       },
     })
 

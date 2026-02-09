@@ -367,66 +367,112 @@ export function SessionContextTab(props: SessionContextTabProps) {
 
   return (
     <div
-      class="@container h-full overflow-y-auto no-scrollbar pb-10"
+      class="@container h-full overflow-y-auto custom-scrollbar pb-10 bg-[#050505] font-mono"
       ref={(el) => {
         scroll = el
         restoreScroll()
       }}
       onScroll={handleScroll}
     >
-      <div class="px-6 pt-4 flex flex-col gap-10">
-        <div class="grid grid-cols-1 @[32rem]:grid-cols-2 gap-4">
-          <For each={stats()}>{(stat) => <Stat label={stat.label} value={stat.value} />}</For>
-        </div>
-
-        <Show when={breakdown().length > 0}>
-          <div class="flex flex-col gap-2">
-            <div class="text-12-regular text-text-weak">{language.t("context.breakdown.title")}</div>
-            <div class="h-2 w-full rounded-full bg-surface-base overflow-hidden flex">
-              <For each={breakdown()}>
-                {(segment) => (
-                  <div
-                    class="h-full"
-                    style={{
-                      width: `${segment.width}%`,
-                      "background-color": segment.color,
-                    }}
-                  />
-                )}
-              </For>
-            </div>
-            <div class="flex flex-wrap gap-x-3 gap-y-1">
-              <For each={breakdown()}>
-                {(segment) => (
-                  <div class="flex items-center gap-1 text-11-regular text-text-weak">
-                    <div class="size-2 rounded-sm" style={{ "background-color": segment.color }} />
-                    <div>{segment.label}</div>
-                    <div class="text-text-weaker">{segment.percent}</div>
-                  </div>
-                )}
-              </For>
-            </div>
-            <div class="hidden text-11-regular text-text-weaker">{language.t("context.breakdown.note")}</div>
+      <div class="px-8 pt-8 flex flex-col gap-12 max-w-4xl">
+        {/* Header Section */}
+        <section class="space-y-8">
+          <div class="flex items-center gap-3 border-b border-[#1A1A1A] pb-4">
+            <span class="w-1 h-5 bg-[#A3BE8C]"></span>
+            <h2 class="text-sm font-bold uppercase tracking-[0.2em] text-[#E0E0E0]">01 // SESSION_DIAGNOSTICS</h2>
           </div>
-        </Show>
 
-        <Show when={systemPrompt()}>
-          {(prompt) => (
-            <div class="flex flex-col gap-2">
-              <div class="text-12-regular text-text-weak">{language.t("context.systemPrompt.title")}</div>
-              <div class="border border-border-base rounded-md bg-surface-base px-3 py-2">
-                <Markdown text={prompt()} class="text-12-regular" />
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+            <For each={stats()}>{(stat) => (
+              <div class="flex justify-between items-baseline border-b border-[#111] pb-2 group hover:border-[#222] transition-colors">
+                <span class="text-[10px] text-[#4A4A4A] uppercase tracking-tighter">{stat.label}</span>
+                <span class="text-[11px] text-[#E0E0E0] font-bold group-hover:text-[#A3BE8C] transition-colors">{stat.value}</span>
+              </div>
+            )}</For>
+          </div>
+        </section>
+
+        {/* Breakdown Section */}
+        <section class="space-y-6">
+          <div class="flex items-center gap-3 border-b border-[#1A1A1A] pb-4">
+            <span class="w-1 h-5 bg-[#88C0D0]"></span>
+            <h2 class="text-sm font-bold uppercase tracking-[0.2em] text-[#E0E0E0]">02 // TOKEN_USAGE_BREAKDOWN</h2>
+          </div>
+
+          <Show when={breakdown().length > 0}>
+            <div class="space-y-6">
+              <div class="h-4 w-full bg-[#111] overflow-hidden flex border border-[#1A1A1A]">
+                <For each={breakdown()}>
+                  {(segment) => (
+                    <div
+                      class="h-full relative group"
+                      style={{
+                        width: `${segment.width}%`,
+                        "background-color": segment.color,
+                      }}
+                    >
+                      <div class="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                  )}
+                </For>
+              </div>
+              <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                <For each={breakdown()}>
+                  {(segment) => (
+                    <div class="flex items-center gap-3 bg-[#0A0A0A] border border-[#1A1A1A] p-3 rounded-sm">
+                      <div class="size-2 shrink-0" style={{ "background-color": segment.color }} />
+                      <div class="flex flex-col">
+                        <span class="text-[9px] text-[#4A4A4A] uppercase tracking-wider">{segment.label}</span>
+                        <div class="flex items-baseline gap-2">
+                          <span class="text-[11px] text-[#E0E0E0] font-bold">{number(segment.tokens)}</span>
+                          <span class="text-[9px] text-[#2A2A2A]">{segment.percent}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </For>
               </div>
             </div>
-          )}
-        </Show>
+          </Show>
+        </section>
 
-        <div class="flex flex-col gap-2">
-          <div class="text-12-regular text-text-weak">{language.t("context.rawMessages.title")}</div>
-          <Accordion multiple>
-            <For each={props.messages()}>{(message) => <RawMessage message={message} />}</For>
+        {/* Messages Section */}
+        <section class="space-y-6">
+          <div class="flex items-center gap-3 border-b border-[#1A1A1A] pb-4">
+            <span class="w-1 h-5 bg-[#B48EAD]"></span>
+            <h2 class="text-sm font-bold uppercase tracking-[0.2em] text-[#E0E0E0]">03 // RAW_MESSAGE_STREAM</h2>
+          </div>
+
+          <Accordion multiple class="space-y-2">
+            <For each={props.messages()}>{(message) => (
+              <Accordion.Item value={message.id} class="border border-[#1A1A1A] bg-[#0A0A0A] rounded-sm overflow-hidden">
+                <Accordion.Trigger class="px-4 py-2 hover:bg-[#111] transition-colors">
+                  <div class="flex items-center justify-between gap-2 w-full text-[10px]">
+                    <div class="flex items-center gap-3">
+                      <span classList={{
+                        "px-1.5 py-0.5 font-bold uppercase": true,
+                        "bg-[#A3BE8C] text-[#050505]": message.role === "assistant",
+                        "bg-[#88C0D0] text-[#050505]": message.role === "user",
+                      }}>
+                        {message.role}
+                      </span>
+                      <span class="text-[#2A2A2A]">{message.id}</span>
+                    </div>
+                    <div class="flex items-center gap-4 text-[#4A4A4A]">
+                      <span>{time(message.time.created)}</span>
+                      <Icon name="chevron-grabber-vertical" size="small" />
+                    </div>
+                  </div>
+                </Accordion.Trigger>
+                <Accordion.Content class="bg-[#050505] border-t border-[#1A1A1A]">
+                  <div class="p-4">
+                    <RawMessageContent message={message} />
+                  </div>
+                </Accordion.Content>
+              </Accordion.Item>
+            )}</For>
           </Accordion>
-        </div>
+        </section>
       </div>
     </div>
   )

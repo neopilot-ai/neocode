@@ -7,6 +7,7 @@ import { LocalPTY } from "@/context/terminal"
 import { resolveThemeVariant, useTheme, withAlpha, type HexColor } from "@neocode-ai/ui/theme"
 import { useLanguage } from "@/context/language"
 import { showToast } from "@neocode-ai/ui/toast"
+import { Icon } from "@neocode-ai/ui/icon"
 
 export interface TerminalProps extends ComponentProps<"div"> {
   pty: LocalPTY
@@ -198,7 +199,7 @@ export const Terminal = (props: TerminalProps) => {
 
         const clipboard = navigator.clipboard
         if (clipboard?.writeText) {
-          clipboard.writeText(selection).catch(() => {})
+          clipboard.writeText(selection).catch(() => { })
           return true
         }
 
@@ -279,7 +280,7 @@ export const Terminal = (props: TerminalProps) => {
                 rows: size.rows,
               },
             })
-            .catch(() => {})
+            .catch(() => { })
         }
       })
       cleanups.push(() => (onResize as unknown as { dispose?: VoidFunction }).dispose?.())
@@ -309,7 +310,7 @@ export const Terminal = (props: TerminalProps) => {
               rows: t.rows,
             },
           })
-          .catch(() => {})
+          .catch(() => { })
       }
       socket.addEventListener("open", handleOpen)
       cleanups.push(() => socket.removeEventListener("open", handleOpen))
@@ -379,19 +380,64 @@ export const Terminal = (props: TerminalProps) => {
   })
 
   return (
-    <div
-      ref={container}
-      data-component="terminal"
-      data-prevent-autofocus
-      tabIndex={-1}
-      style={{ "background-color": terminalColors().background }}
-      classList={{
-        ...(local.classList ?? {}),
-        "select-text": true,
-        "size-full px-6 py-3 font-mono": true,
-        [local.class ?? ""]: !!local.class,
-      }}
-      {...others}
-    />
+    <div class="flex flex-col size-full overflow-hidden bg-[#0A0A0A]">
+      <div class="flex items-center justify-between px-6 py-2 border-b border-[#1A1A1A] bg-[#050505] text-[10px] font-mono text-[#4A4A4A]">
+        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-2">
+            <div class="size-1.5 rounded-full bg-[#A3BE8C] shadow-[0_0_8px_rgba(163,190,140,0.5)]"></div>
+            <span class="text-[#E0E0E0] tracking-widest lowercase">session://{local.pty.id.substring(0, 8)}</span>
+          </div>
+          <span class="opacity-30">|</span>
+          <div class="flex items-center gap-2">
+            <Icon name="console" class="!w-3 !h-3 opacity-50" />
+            <span>{local.pty.title || "ghostty-v1.1"}</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-6">
+          <div class="hidden sm:flex items-center gap-3">
+            <span>BUFFER: 10K</span>
+            <span>UTF-8</span>
+          </div>
+          <div class="px-2 py-0.5 border border-[#1A1A1A] rounded-sm text-[9px] uppercase tracking-tighter text-[#E0E0E0]/50">
+            Active
+          </div>
+        </div>
+      </div>
+      <div
+        ref={container}
+        data-component="terminal"
+        data-prevent-autofocus
+        tabIndex={-1}
+        classList={{
+          ...(local.classList ?? {}),
+          "select-text": true,
+          "flex-1 px-6 py-4 font-mono": true,
+          [local.class ?? ""]: !!local.class,
+        }}
+        {...others}
+      />
+      <div class="flex items-center justify-between px-6 py-1.5 border-t border-[#1A1A1A] bg-[#050505] text-[9px] font-mono text-[#4A4A4A] uppercase tracking-tighter">
+        <div class="flex gap-4">
+          <div class="flex gap-1.5 items-center">
+            <span class="text-[#88C0D0]">MODE:</span>
+            <span class="text-[#E0E0E0]">CMD_INPUT</span>
+          </div>
+          <div class="flex gap-1.5 items-center">
+            <span class="text-[#4A4A4A]">ENC:</span>
+            <span class="text-[#E0E0E0]">UTF-8</span>
+          </div>
+        </div>
+        <div class="flex gap-4">
+          <div class="flex gap-1.5 items-center">
+            <span class="text-[#A3BE8C]">STATUS:</span>
+            <span class="text-[#E0E0E0]">CONNECTED</span>
+          </div>
+          <div class="flex gap-1.5 items-center">
+            <span class="text-[#4A4A4A]">ID:</span>
+            <span class="text-[#E0E0E0]">{local.pty.id.substring(0, 4)}</span>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }

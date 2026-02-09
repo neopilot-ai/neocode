@@ -565,140 +565,123 @@ export function SessionTurn(
   })
 
   return (
-    <div data-component="session-turn" class={props.classes?.root} ref={setRootRef}>
+    <div data-component="session-turn" class={`${props.classes?.root} font-mono`} ref={setRootRef}>
       <div
         ref={autoScroll.scrollRef}
         onScroll={autoScroll.handleScroll}
         data-slot="session-turn-content"
         class={props.classes?.content}
       >
-        <div onClick={autoScroll.handleInteraction}>
+        <div onClick={autoScroll.handleInteraction} class="py-6">
           <Show when={message()}>
             {(msg) => (
               <div
                 ref={autoScroll.contentRef}
                 data-message={msg().id}
                 data-slot="session-turn-message-container"
-                class={props.classes?.container}
+                class={`${props.classes?.container} max-w-none border-l-2 border-[#1A1A1A] ml-2 md:ml-6 pl-4 md:pl-8`}
               >
+                {/* Turn Header */}
+                <div class="flex items-center gap-4 mb-6 -ml-[calc(1rem+2px)] md:-ml-[calc(2rem-2px)]">
+                  <div class="size-2 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] shadow-[0_0_10px_rgba(163,190,140,0.1)]" />
+                  <div class="flex items-center gap-3">
+                    <span class="text-[10px] font-bold text-[#333] tracking-[0.3em] uppercase">TURN_{msg().id.slice(0, 4)}</span>
+                    <span class="w-12 h-[1px] bg-[#111]"></span>
+                    <span class="text-[9px] text-[#2A2A2A]">{DateTime.fromMillis(msg().time.created).toFormat("HH:mm:ss")}</span>
+                  </div>
+                </div>
+
                 <Switch>
                   <Match when={isShellMode()}>
                     <Part part={shellModePart()!} message={msg()} defaultOpen />
                   </Match>
                   <Match when={true}>
                     <Show when={attachmentParts().length > 0}>
-                      <div data-slot="session-turn-attachments" aria-live="off">
+                      <div data-slot="session-turn-attachments" aria-live="off" class="mb-4">
                         <Message message={msg()} parts={attachmentParts()} />
                       </div>
                     </Show>
                     <div data-slot="session-turn-sticky" ref={setStickyRef}>
                       {/* User Message */}
-                      <div data-slot="session-turn-message-content" aria-live="off">
+                      <div data-slot="session-turn-message-content" aria-live="off" class="text-[#E0E0E0] text-[13px] leading-relaxed mb-6">
                         <Message message={msg()} parts={stickyParts()} />
                       </div>
 
-                      {/* Trigger (sticky) */}
+                      {/* Trigger (status bar) */}
                       <Show when={working() || hasSteps()}>
-                        <div data-slot="session-turn-response-trigger">
-                          <Button
+                        <div data-slot="session-turn-response-trigger" class="my-6">
+                          <button
                             data-expandable={assistantMessages().length > 0}
-                            data-slot="session-turn-collapsible-trigger-content"
-                            variant="ghost"
-                            size="small"
-                            onClick={props.onStepsExpandedToggle ?? (() => {})}
+                            class="flex items-center gap-3 px-3 py-1.5 bg-[#0A0A0A] border border-[#1A1A1A] rounded-sm hover:border-[#A3BE8C]/30 transition-all text-[#4A4A4A] group"
+                            onClick={props.onStepsExpandedToggle ?? (() => { })}
                             aria-expanded={props.stepsExpanded}
                           >
-                            <Switch>
-                              <Match when={working()}>
-                                <Spinner />
-                              </Match>
-                              <Match when={!props.stepsExpanded}>
-                                <svg
-                                  width="10"
-                                  height="10"
-                                  viewBox="0 0 10 10"
-                                  fill="none"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  data-slot="session-turn-trigger-icon"
-                                >
-                                  <path
-                                    d="M8.125 1.875H1.875L5 8.125L8.125 1.875Z"
-                                    fill="currentColor"
-                                    stroke="currentColor"
-                                    stroke-linejoin="round"
-                                  />
-                                </svg>
-                              </Match>
-                              <Match when={props.stepsExpanded}>
-                                <svg
-                                  width="10"
-                                  height="10"
-                                  viewBox="0 0 10 10"
-                                  fill="none"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  class="text-icon-base"
-                                >
-                                  <path
-                                    d="M8.125 8.125H1.875L5 1.875L8.125 8.125Z"
-                                    fill="currentColor"
-                                    stroke="currentColor"
-                                    stroke-linejoin="round"
-                                  />
-                                </svg>
-                              </Match>
-                            </Switch>
-                            <Switch>
-                              <Match when={retry()}>
-                                <span data-slot="session-turn-retry-message">
-                                  {(() => {
-                                    const r = retry()
-                                    if (!r) return ""
-                                    return r.message.length > 60 ? r.message.slice(0, 60) + "..." : r.message
-                                  })()}
-                                </span>
-                                <span data-slot="session-turn-retry-seconds">
-                                  · {i18n.t("ui.sessionTurn.retry.retrying")}
-                                  {store.retrySeconds > 0
-                                    ? " " + i18n.t("ui.sessionTurn.retry.inSeconds", { seconds: store.retrySeconds })
-                                    : ""}
-                                </span>
-                                <span data-slot="session-turn-retry-attempt">(#{retry()?.attempt})</span>
-                              </Match>
-                              <Match when={working()}>
-                                <span data-slot="session-turn-status-text">
-                                  {store.status ?? i18n.t("ui.sessionTurn.status.consideringNextSteps")}
-                                </span>
-                              </Match>
-                              <Match when={props.stepsExpanded}>
-                                <span data-slot="session-turn-status-text">{i18n.t("ui.sessionTurn.steps.hide")}</span>
-                              </Match>
-                              <Match when={!props.stepsExpanded}>
-                                <span data-slot="session-turn-status-text">{i18n.t("ui.sessionTurn.steps.show")}</span>
-                              </Match>
-                            </Switch>
-                            <span aria-hidden="true">·</span>
-                            <span aria-live="off">{store.duration}</span>
-                          </Button>
+                            <div class="flex items-center gap-2">
+                              <Switch>
+                                <Match when={working()}>
+                                  <div class="size-2.5 bg-[#A3BE8C] animate-pulse rounded-[1px]" />
+                                </Match>
+                                <Match when={true}>
+                                  <div class={`size-2.5 border border-[#4A4A4A] rounded-[1px] ${props.stepsExpanded ? "bg-[#A3BE8C]/20 border-[#A3BE8C]/50" : ""}`} />
+                                </Match>
+                              </Switch>
+
+                              <div class="flex items-center gap-3 font-mono text-[10px] font-bold uppercase tracking-widest">
+                                <Switch>
+                                  <Match when={retry()}>
+                                    <span class="text-[#BF616A]">
+                                      {(() => {
+                                        const r = retry()
+                                        if (!r) return ""
+                                        return r.message.length > 50 ? r.message.slice(0, 50) + "..." : r.message
+                                      })()}
+                                    </span>
+                                    <span class="text-[#4A4A4A]">
+                                      · {i18n.t("ui.sessionTurn.retry.retrying")}
+                                      {store.retrySeconds > 0
+                                        ? " " + i18n.t("ui.sessionTurn.retry.inSeconds", { seconds: store.retrySeconds })
+                                        : ""}
+                                    </span>
+                                  </Match>
+                                  <Match when={working()}>
+                                    <span class="text-[#A3BE8C] text-glow">
+                                      {store.status ?? i18n.t("ui.sessionTurn.status.consideringNextSteps")}
+                                    </span>
+                                  </Match>
+                                  <Match when={props.stepsExpanded}>
+                                    <span class="text-[#E0E0E0]">{i18n.t("ui.sessionTurn.steps.hide")}</span>
+                                  </Match>
+                                  <Match when={!props.stepsExpanded}>
+                                    <span class="text-[#4A4A4A] group-hover:text-[#E0E0E0]">{i18n.t("ui.sessionTurn.steps.show")}</span>
+                                  </Match>
+                                </Switch>
+                                <span class="text-[#2A2A2A] font-light">·</span>
+                                <span class="text-[#2A2A2A] font-light">{store.duration}</span>
+                              </div>
+                            </div>
+                          </button>
                         </div>
                       </Show>
                     </div>
-                    {/* Response */}
+                    {/* Response Steps */}
                     <Show when={props.stepsExpanded && assistantMessages().length > 0}>
-                      <div data-slot="session-turn-collapsible-content-inner" aria-hidden={working()}>
+                      <div data-slot="session-turn-collapsible-content-inner" aria-hidden={working()} class="space-y-4 mb-8">
                         <For each={assistantMessages()}>
                           {(assistantMessage) => (
-                            <AssistantMessageItem
-                              message={assistantMessage}
-                              responsePartId={responsePartId()}
-                              hideResponsePart={hideResponsePart()}
-                              hideReasoning={!working()}
-                            />
+                            <div class="border-l border-[#1A1A1A] pl-6 py-2">
+                              <AssistantMessageItem
+                                message={assistantMessage}
+                                responsePartId={responsePartId()}
+                                hideResponsePart={hideResponsePart()}
+                                hideReasoning={!working()}
+                              />
+                            </div>
                           )}
                         </For>
                         <Show when={error()}>
-                          <Card variant="error" class="error-card">
+                          <div class="p-4 bg-[#BF616A]/10 border border-[#BF616A]/30 text-[#BF616A] text-[11px]">
                             {error()?.data?.message as string}
-                          </Card>
+                          </div>
                         </Show>
                       </div>
                     </Show>
@@ -728,118 +711,109 @@ export function SessionTurn(
                       {!working() && response() ? response() : ""}
                     </div>
                     <Show when={!working() && (response() || hasDiffs())}>
-                      <div data-slot="session-turn-summary-section">
-                        <div data-slot="session-turn-summary-header">
-                          <h2 data-slot="session-turn-summary-title">{i18n.t("ui.sessionTurn.summary.response")}</h2>
-                          <div data-slot="session-turn-response">
-                            <Markdown
-                              data-slot="session-turn-markdown"
-                              data-diffs={hasDiffs()}
-                              text={response() ?? ""}
-                              cacheKey={responsePartId()}
-                            />
-                            <Show when={response()}>
-                              <div data-slot="session-turn-response-copy-wrapper">
-                                <Tooltip
-                                  value={copied() ? i18n.t("ui.message.copied") : i18n.t("ui.message.copy")}
-                                  placement="top"
-                                  gutter={8}
-                                >
-                                  <IconButton
-                                    icon={copied() ? "check" : "copy"}
-                                    variant="secondary"
-                                    onMouseDown={(e) => e.preventDefault()}
-                                    onClick={(event) => {
-                                      event.stopPropagation()
-                                      handleCopy()
-                                    }}
-                                    aria-label={copied() ? i18n.t("ui.message.copied") : i18n.t("ui.message.copy")}
-                                  />
-                                </Tooltip>
-                              </div>
-                            </Show>
-                          </div>
-                        </div>
-                        <Accordion
-                          data-slot="session-turn-accordion"
-                          multiple
-                          value={store.diffsOpen}
-                          onChange={(value) => {
-                            if (!Array.isArray(value)) return
-                            setStore("diffsOpen", value)
-                          }}
-                        >
-                          <For each={messageDiffs().slice(0, store.diffLimit)}>
-                            {(diff) => (
-                              <Accordion.Item value={diff.file}>
-                                <StickyAccordionHeader>
-                                  <Accordion.Trigger>
-                                    <div data-slot="session-turn-accordion-trigger-content">
-                                      <div data-slot="session-turn-file-info">
-                                        <FileIcon
-                                          node={{ path: diff.file, type: "file" }}
-                                          data-slot="session-turn-file-icon"
-                                        />
-                                        <div data-slot="session-turn-file-path">
-                                          <Show when={diff.file.includes("/")}>
-                                            <span data-slot="session-turn-directory">
-                                              {`\u202A${getDirectory(diff.file)}\u202C`}
-                                            </span>
-                                          </Show>
-                                          <span data-slot="session-turn-filename">{getFilename(diff.file)}</span>
-                                        </div>
-                                      </div>
-                                      <div data-slot="session-turn-accordion-actions">
-                                        <DiffChanges changes={diff} />
-                                        <Icon name="chevron-grabber-vertical" size="small" />
-                                      </div>
-                                    </div>
-                                  </Accordion.Trigger>
-                                </StickyAccordionHeader>
-                                <Accordion.Content data-slot="session-turn-accordion-content">
-                                  <Show when={store.diffsOpen.includes(diff.file!)}>
-                                    <Dynamic
-                                      component={diffComponent}
-                                      before={{
-                                        name: diff.file!,
-                                        contents: diff.before!,
-                                      }}
-                                      after={{
-                                        name: diff.file!,
-                                        contents: diff.after!,
+                      <div data-slot="session-turn-summary-section" class="mt-8 space-y-8">
+                        <Show when={response()}>
+                          <div class="space-y-4">
+                            <div class="flex items-center gap-2">
+                              <span class="text-[9px] font-black text-[#A3BE8C] uppercase tracking-[0.2em] leading-none px-1.5 py-0.5 border border-[#A3BE8C]/30 bg-[#A3BE8C]/5">AGENT_RESPONSE</span>
+                              <div class="flex-1 h-[1px] bg-gradient-to-r from-[#1A1A1A] to-transparent"></div>
+                            </div>
+
+                            <div class="relative group/response">
+                              <Markdown
+                                data-slot="session-turn-markdown"
+                                class="text-[#E0E0E0] text-[14px] leading-relaxed selection:bg-[#A3BE8C] selection:text-[#050505]"
+                                text={response() ?? ""}
+                                cacheKey={responsePartId()}
+                              />
+                              <Show when={response()}>
+                                <div class="absolute -right-10 top-0 opacity-0 group-hover/response:opacity-100 transition-opacity">
+                                  <Tooltip
+                                    value={copied() ? i18n.t("ui.message.copied") : i18n.t("ui.message.copy")}
+                                    placement="top"
+                                    gutter={8}
+                                  >
+                                    <IconButton
+                                      icon={copied() ? "check" : "copy"}
+                                      variant="ghost"
+                                      class="size-8 text-[#4A4A4A] hover:text-[#E0E0E0]"
+                                      onMouseDown={(e) => e.preventDefault()}
+                                      onClick={(event) => {
+                                        event.stopPropagation()
+                                        handleCopy()
                                       }}
                                     />
-                                  </Show>
-                                </Accordion.Content>
-                              </Accordion.Item>
-                            )}
-                          </For>
-                        </Accordion>
-                        <Show when={messageDiffs().length > store.diffLimit}>
-                          <Button
-                            data-slot="session-turn-accordion-more"
-                            variant="ghost"
-                            size="small"
-                            onClick={() => {
-                              const total = messageDiffs().length
-                              setStore("diffLimit", (limit) => {
-                                const next = limit + diffBatch
-                                if (next > total) return total
-                                return next
-                              })
-                            }}
-                          >
-                            {i18n.t("ui.sessionTurn.diff.showMore", {
-                              count: messageDiffs().length - store.diffLimit,
-                            })}
-                          </Button>
+                                  </Tooltip>
+                                </div>
+                              </Show>
+                            </div>
+                          </div>
+                        </Show>
+
+                        <Show when={hasDiffs()}>
+                          <div data-slot="session-turn-diff-section" class="space-y-4 pt-6 mt-6 border-t border-[#1A1A1A]">
+                            <div class="flex items-center gap-2">
+                              <span class="text-[9px] font-black text-[#88C0D0] uppercase tracking-[0.2em] leading-none px-1.5 py-0.5 border border-[#88C0D0]/30 bg-[#88C0D0]/5">FILE_CHANGES</span>
+                              <div class="flex-1 h-[1px] bg-gradient-to-r from-[#1A1A1A] to-transparent"></div>
+                            </div>
+                            <div class="space-y-3">
+                              <For each={messageDiffs().slice(0, store.diffLimit)}>
+                                {(diff) => (
+                                  <div class="space-y-2">
+                                    <div
+                                      class="flex items-center justify-between p-2 bg-[#0A0A0A] border border-[#1A1A1A] cursor-pointer hover:bg-[#111] transition-colors"
+                                      onClick={() => {
+                                        const isOpen = store.diffsOpen.includes(diff.file)
+                                        if (isOpen) setStore("diffsOpen", (prev) => prev.filter((p) => p !== diff.file))
+                                        else setStore("diffsOpen", (prev) => [...prev, diff.file])
+                                      }}
+                                    >
+                                      <div class="flex items-center gap-3">
+                                        <span class="text-[10px] text-[#4A4A4A] font-bold">[{store.diffsOpen.includes(diff.file) ? "-" : "+"}]</span>
+                                        <span class="text-[11px] text-[#E0E0E0] truncate max-w-[300px]">{diff.file}</span>
+                                      </div>
+                                      <DiffChanges changes={diff} variant="bars" class="h-3" />
+                                    </div>
+                                    <Show when={store.diffsOpen.includes(diff.file)}>
+                                      <div class="border border-[#1A1A1A] border-t-0 bg-[#050505] p-1 overflow-x-auto custom-scrollbar">
+                                        <Dynamic
+                                          component={diffComponent}
+                                          before={{ name: diff.file, contents: typeof diff.before === "string" ? diff.before : "" }}
+                                          after={{ name: diff.file, contents: typeof diff.after === "string" ? diff.after : "" }}
+                                        />
+                                      </div>
+                                    </Show>
+                                  </div>
+                                )}
+                              </For>
+                            </div>
+                            <Show when={messageDiffs().length > store.diffLimit}>
+                              <Button
+                                variant="ghost"
+                                size="small"
+                                class="!text-[10px] font-bold uppercase tracking-widest text-[#4A4A4A] hover:text-[#E0E0E0] border border-transparent hover:border-[#1A1A1A]"
+                                onClick={() => {
+                                  const total = messageDiffs().length
+                                  setStore("diffLimit", (limit) => {
+                                    const next = limit + diffBatch
+                                    if (next > total) return total
+                                    return next
+                                  })
+                                }}
+                              >
+                                {i18n.t("ui.sessionTurn.diff.showMore", {
+                                  count: messageDiffs().length - store.diffLimit,
+                                })}
+                              </Button>
+                            </Show>
+                          </div>
                         </Show>
                       </div>
                     </Show>
                     <Show when={error() && !props.stepsExpanded}>
-                      <Card variant="error" class="error-card">
-                        {error()?.data?.message as string}
-                      </Card>
+                      <div class="mt-6 p-4 bg-[#BF616A]/10 border border-[#BF616A]/30 text-[#BF616A] text-[11px] font-bold">
+                        [ERROR] {error()?.data?.message as string}
+                      </div>
                     </Show>
                   </Match>
                 </Switch>

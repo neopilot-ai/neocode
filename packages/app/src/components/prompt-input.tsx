@@ -924,7 +924,7 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
       .abort({
         sessionID,
       })
-      .catch(() => {})
+      .catch(() => { })
   }
 
   const addToHistory = (prompt: Prompt, mode: "normal" | "shell") => {
@@ -1350,18 +1350,18 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
 
     const contextParts: Array<
       | {
-          id: string
-          type: "text"
-          text: string
-          synthetic?: boolean
-        }
+        id: string
+        type: "text"
+        text: string
+        synthetic?: boolean
+      }
       | {
-          id: string
-          type: "file"
-          mime: string
-          url: string
-          filename?: string
-        }
+        id: string
+        type: "file"
+        mime: string
+        url: string
+        filename?: string
+      }
     > = []
 
     const commentNote = (path: string, selection: FileSelection | undefined, comment: string) => {
@@ -1625,23 +1625,25 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
           ref={(el) => {
             if (store.popover === "slash") slashPopoverRef = el
           }}
-          class="absolute inset-x-0 -top-3 -translate-y-full origin-bottom-left max-h-80 min-h-10
-                 overflow-auto no-scrollbar flex flex-col p-2 rounded-md
-                 border border-border-base bg-surface-raised-stronger-non-alpha shadow-md"
+          class="absolute inset-x-0 -top-4 -translate-y-full origin-bottom-left max-h-80 min-h-10
+                 overflow-auto custom-scrollbar flex flex-col p-1 rounded-sm
+                 border border-[#1A1A1A] bg-[#0A0A0A] shadow-2xl z-50 font-mono"
           onMouseDown={(e) => e.preventDefault()}
         >
           <Switch>
             <Match when={store.popover === "at"}>
               <Show
                 when={atFlat().length > 0}
-                fallback={<div class="text-text-weak px-2 py-1">{language.t("prompt.popover.emptyResults")}</div>}
+                fallback={<div class="text-[#4A4A4A] px-3 py-2 text-[11px] uppercase tracking-wider">{language.t("prompt.popover.emptyResults")}</div>}
               >
+                <div class="px-3 py-2 text-[10px] text-[#2A2A2A] font-bold uppercase tracking-[0.2em] border-b border-[#111] mb-1">Select_Reference</div>
                 <For each={atFlat().slice(0, 10)}>
                   {(item) => (
                     <button
                       classList={{
-                        "w-full flex items-center gap-x-2 rounded-md px-2 py-0.5": true,
-                        "bg-surface-raised-base-hover": atActive() === atKey(item),
+                        "w-full flex items-center gap-x-3 rounded-none px-3 py-2 transition-colors": true,
+                        "bg-[#1A1A1A] text-[#A3BE8C]": atActive() === atKey(item),
+                        "text-[#4A4A4A]": atActive() !== atKey(item),
                       }}
                       onClick={() => handleAtSelect(item)}
                       onMouseEnter={() => setAtActive(atKey(item))}
@@ -1652,17 +1654,17 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
                           <>
                             <FileIcon
                               node={{ path: (item as { type: "file"; path: string }).path, type: "file" }}
-                              class="shrink-0 size-4"
+                              class="shrink-0 size-3.5 grayscale opacity-50"
                             />
-                            <div class="flex items-center text-14-regular min-w-0">
-                              <span class="text-text-weak whitespace-nowrap truncate min-w-0">
+                            <div class="flex items-center text-[11px] font-bold min-w-0 tracking-tight">
+                              <span class="opacity-40 whitespace-nowrap truncate min-w-0">
                                 {(() => {
                                   const path = (item as { type: "file"; path: string }).path
                                   return path.endsWith("/") ? path : getDirectory(path)
                                 })()}
                               </span>
                               <Show when={!(item as { type: "file"; path: string }).path.endsWith("/")}>
-                                <span class="text-text-strong whitespace-nowrap">
+                                <span class="whitespace-nowrap">
                                   {getFilename((item as { type: "file"; path: string }).path)}
                                 </span>
                               </Show>
@@ -1670,8 +1672,8 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
                           </>
                         }
                       >
-                        <Icon name="brain" size="small" class="text-icon-info-active shrink-0" />
-                        <span class="text-14-regular text-text-strong whitespace-nowrap">
+                        <Icon name="brain" size="small" class="shrink-0" />
+                        <span class="text-[11px] font-bold whitespace-nowrap tracking-tight">
                           @{(item as { type: "agent"; name: string }).name}
                         </span>
                       </Show>
@@ -1683,28 +1685,30 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
             <Match when={store.popover === "slash"}>
               <Show
                 when={slashFlat().length > 0}
-                fallback={<div class="text-text-weak px-2 py-1">{language.t("prompt.popover.emptyCommands")}</div>}
+                fallback={<div class="text-[#4A4A4A] px-3 py-2 text-[11px] uppercase tracking-wider">{language.t("prompt.popover.emptyCommands")}</div>}
               >
+                <div class="px-3 py-2 text-[10px] text-[#2A2A2A] font-bold uppercase tracking-[0.2em] border-b border-[#111] mb-1">Execute_Command</div>
                 <For each={slashFlat()}>
                   {(cmd) => (
                     <button
                       data-slash-id={cmd.id}
                       classList={{
-                        "w-full flex items-center justify-between gap-4 rounded-md px-2 py-1": true,
-                        "bg-surface-raised-base-hover": slashActive() === cmd.id,
+                        "w-full flex items-center justify-between gap-4 rounded-none px-3 py-2 transition-colors": true,
+                        "bg-[#1A1A1A] text-[#88C0D0]": slashActive() === cmd.id,
+                        "text-[#4A4A4A]": slashActive() !== cmd.id,
                       }}
                       onClick={() => handleSlashSelect(cmd)}
                       onMouseEnter={() => setSlashActive(cmd.id)}
                     >
-                      <div class="flex items-center gap-2 min-w-0">
-                        <span class="text-14-regular text-text-strong whitespace-nowrap">/{cmd.trigger}</span>
+                      <div class="flex items-center gap-3 min-w-0">
+                        <span class="text-[11px] font-bold whitespace-nowrap">/{cmd.trigger}</span>
                         <Show when={cmd.description}>
-                          <span class="text-14-regular text-text-weak truncate">{cmd.description}</span>
+                          <span class="text-[10px] opacity-40 truncate">{cmd.description}</span>
                         </Show>
                       </div>
                       <div class="flex items-center gap-2 shrink-0">
                         <Show when={cmd.type === "custom" && cmd.source !== "command"}>
-                          <span class="text-11-regular text-text-subtle px-1.5 py-0.5 bg-surface-base rounded">
+                          <span class="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-[#050505] border border-[#1A1A1A] rounded-sm">
                             {cmd.source === "skill"
                               ? language.t("prompt.slash.badge.skill")
                               : cmd.source === "mcp"
@@ -1713,7 +1717,7 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
                           </span>
                         </Show>
                         <Show when={command.keybind(cmd.id)}>
-                          <span class="text-12-regular text-text-subtle">{command.keybind(cmd.id)}</span>
+                          <span class="text-[9px] opacity-30 tracking-widest">{command.keybind(cmd.id)}</span>
                         </Show>
                       </div>
                     </button>
@@ -1727,23 +1731,24 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
       <form
         onSubmit={handleSubmit}
         classList={{
-          "group/prompt-input": true,
-          "bg-surface-raised-stronger-non-alpha shadow-xs-border relative": true,
-          "rounded-[14px] overflow-clip focus-within:shadow-xs-border": true,
-          "border-icon-info-active border-dashed": store.dragging,
+          "group/prompt-input transition-all duration-300": true,
+          "bg-[#050505] border border-[#1A1A1A] relative shadow-2xl": true,
+          "rounded-none overflow-hidden": true,
+          "focus-within:border-[#A3BE8C]/50 focus-within:bg-[#0A0A0A]": true,
+          "border-[#A3BE8C] border-dashed": store.dragging,
           [props.class ?? ""]: !!props.class,
         }}
       >
         <Show when={store.dragging}>
-          <div class="absolute inset-0 z-10 flex items-center justify-center bg-surface-raised-stronger-non-alpha/90 pointer-events-none">
-            <div class="flex flex-col items-center gap-2 text-text-weak">
-              <Icon name="photo" class="size-8" />
-              <span class="text-14-regular">{language.t("prompt.dropzone.label")}</span>
+          <div class="absolute inset-0 z-10 flex items-center justify-center bg-[#050505]/95 border-2 border-dashed border-[#A3BE8C] pointer-events-none">
+            <div class="flex flex-col items-center gap-3 text-[#A3BE8C]">
+              <Icon name="photo" class="size-8 animate-bounce" />
+              <span class="text-[10px] font-bold uppercase tracking-widest">{language.t("prompt.dropzone.label")}</span>
             </div>
           </div>
         </Show>
         <Show when={prompt.context.items().length > 0}>
-          <div class="flex flex-nowrap items-start gap-2 p-2 overflow-x-auto no-scrollbar">
+          <div class="flex flex-nowrap items-start gap-2 p-2 px-3 overflow-x-auto custom-scrollbar bg-[#0A0A0A] border-b border-[#1A1A1A]">
             <For each={prompt.context.items()}>
               {(item) => {
                 const active = () => {
@@ -1752,36 +1757,27 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
                 }
                 return (
                   <Tooltip
-                    value={
-                      <span class="flex max-w-[300px]">
-                        <span class="text-text-invert-base truncate-start [unicode-bidi:plaintext] min-w-0">
-                          {getDirectory(item.path)}
-                        </span>
-                        <span class="shrink-0">{getFilename(item.path)}</span>
-                      </span>
-                    }
+                    value={item.path}
                     placement="top"
-                    openDelay={2000}
+                    openDelay={1000}
                   >
                     <div
                       classList={{
-                        "group shrink-0 flex flex-col rounded-[6px] pl-2 pr-1 py-1 max-w-[200px] h-12 transition-all transition-transform shadow-xs-border hover:shadow-xs-border-hover": true,
-                        "cursor-pointer hover:bg-surface-interactive-weak": !!item.commentID && !active(),
-                        "cursor-pointer bg-surface-interactive-hover hover:bg-surface-interactive-hover shadow-xs-border-hover":
-                          active(),
-                        "bg-background-stronger": !active(),
+                        "group shrink-0 flex flex-col rounded-sm border px-3 py-1.5 max-w-[200px] h-11 transition-all font-mono": true,
+                        "border-[#1A1A1A] bg-[#050505] hover:border-[#333]": !active(),
+                        "border-[#A3BE8C] bg-[#A3BE8C]/10": active(),
                       }}
                       onClick={() => {
                         openComment(item)
                       }}
                     >
-                      <div class="flex items-center gap-1.5">
-                        <FileIcon node={{ path: item.path, type: "file" }} class="shrink-0 size-3.5" />
-                        <div class="flex items-center text-11-regular min-w-0 font-medium">
-                          <span class="text-text-strong whitespace-nowrap">{getFilenameTruncated(item.path, 14)}</span>
+                      <div class="flex items-center gap-2">
+                        <FileIcon node={{ path: item.path, type: "file" }} class="shrink-0 size-3 grayscale opacity-60" />
+                        <div class="flex items-center text-[10px] min-w-0 font-bold tracking-tight">
+                          <span class="text-[#E0E0E0] whitespace-nowrap">{getFilenameTruncated(item.path, 14)}</span>
                           <Show when={item.selection}>
                             {(sel) => (
-                              <span class="text-text-weak whitespace-nowrap shrink-0">
+                              <span class="text-[#4A4A4A] whitespace-nowrap shrink-0 ml-1 opacity-50">
                                 {sel().startLine === sel().endLine
                                   ? `:${sel().startLine}`
                                   : `:${sel().startLine}-${sel().endLine}`}
@@ -1789,22 +1785,22 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
                             )}
                           </Show>
                         </div>
-                        <IconButton
+                        <button
                           type="button"
-                          icon="close-small"
-                          variant="ghost"
-                          class="ml-auto size-3.5 opacity-0 group-hover:opacity-100 transition-all"
+                          class="ml-auto size-3 opacity-0 group-hover:opacity-100 transition-all text-[#4A4A4A] hover:text-[#BF616A]"
                           onClick={(e) => {
                             e.stopPropagation()
                             if (item.commentID) comments.remove(item.path, item.commentID)
                             prompt.context.remove(item.key)
                           }}
                           aria-label={language.t("prompt.context.removeFile")}
-                        />
+                        >
+                          <Icon name="close-small" class="size-full" />
+                        </button>
                       </div>
                       <Show when={item.comment}>
                         {(comment) => (
-                          <div class="text-12-regular text-text-strong ml-5 pr-1 truncate">{comment()}</div>
+                          <div class="text-[10px] text-[#4A4A4A] truncate pl-5">{comment()}</div>
                         )}
                       </Show>
                     </div>
@@ -1878,10 +1874,9 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
             onKeyDown={handleKeyDown}
             classList={{
               "select-text": true,
-              "w-full p-3 pr-12 text-14-regular text-text-strong focus:outline-none whitespace-pre-wrap": true,
-              "[&_[data-type=file]]:text-syntax-property": true,
-              "[&_[data-type=agent]]:text-syntax-type": true,
-              "font-mono!": store.mode === "shell",
+              "w-full p-3 pr-12 text-[14px] font-mono text-[#E0E0E0] focus:outline-none whitespace-pre-wrap": true,
+              "[&_[data-type=file]]:text-[#88C0D0]": true,
+              "[&_[data-type=agent]]:text-[#B48EAD]": true,
             }}
           />
           <Show when={!prompt.dirty()}>
@@ -1896,14 +1891,14 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
             </div>
           </Show>
         </div>
-        <div class="relative p-3 flex items-center justify-between gap-2">
+        <div class="relative p-2 px-3 bg-[#050505] border-t border-[#1A1A1A] flex items-center justify-between gap-2 font-mono">
           <div class="flex items-center gap-2 min-w-0 flex-1">
             <Switch>
               <Match when={store.mode === "shell"}>
-                <div class="flex items-center gap-2 px-2 h-6">
-                  <Icon name="console" size="small" class="text-icon-primary" />
-                  <span class="text-12-regular text-text-primary">{language.t("prompt.mode.shell")}</span>
-                  <span class="text-12-regular text-text-weak">{language.t("prompt.mode.shell.exit")}</span>
+                <div class="flex items-center gap-3 px-3 h-6 bg-[#A3BE8C]/10 border border-[#A3BE8C]/30 rounded-sm">
+                  <Icon name="console" size="small" class="text-[#A3BE8C]" />
+                  <span class="text-[10px] font-bold text-[#A3BE8C] uppercase tracking-widest">{language.t("prompt.mode.shell")}</span>
+                  <span class="text-[10px] text-[#4A4A4A]">{language.t("prompt.mode.shell.exit")}</span>
                 </div>
               </Match>
               <Match when={store.mode === "normal"}>
@@ -1917,11 +1912,14 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
                     options={local.agent.list().map((agent) => agent.name)}
                     current={local.agent.current()?.name ?? ""}
                     onSelect={local.agent.set}
-                    class={`capitalize ${local.model.variant.list().length > 0 ? "max-w-[80px]" : "max-w-[120px]"}`}
-                    valueClass="truncate"
+                    class={`!bg-transparent !border-0 !h-7 !px-2 !font-bold !text-[11px] !uppercase !tracking-wider ${local.model.variant.list().length > 0 ? "max-w-[100px]" : "max-w-[140px]"}`}
+                    valueClass="truncate text-[#E0E0E0]"
                     variant="ghost"
                   />
                 </TooltipKeybind>
+
+                <span class="text-[#1A1A1A]">|</span>
+
                 <Show
                   when={providers.paid().length > 0}
                   fallback={
@@ -1934,16 +1932,16 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
                       <Button
                         as="div"
                         variant="ghost"
-                        class="px-2 min-w-0 max-w-[140px]"
+                        class="!h-7 px-2 min-w-0 max-w-[140px] !text-[11px] !font-bold !border-0"
                         onClick={() => dialog.show(() => <DialogSelectModelUnpaid />)}
                       >
                         <Show when={local.model.current()?.provider?.id}>
-                          <ProviderIcon id={local.model.current()!.provider.id as IconName} class="size-4 shrink-0" />
+                          <ProviderIcon id={local.model.current()!.provider.id as IconName} class="size-3.5 grayscale opacity-60 mr-2" />
                         </Show>
-                        <span class="truncate max-w-[100px]">
+                        <span class="truncate max-w-[100px] text-[#4A4A4A] group-hover:text-[#E0E0E0]">
                           {local.model.current()?.name ?? language.t("dialog.model.select.title")}
                         </span>
-                        <Icon name="chevron-down" size="small" class="shrink-0" />
+                        <Icon name="chevron-down" size="small" class="ml-1 opacity-30" />
                       </Button>
                     </TooltipKeybind>
                   }
@@ -1956,19 +1954,21 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
                   >
                     <ModelSelectorPopover
                       triggerAs={Button}
-                      triggerProps={{ variant: "ghost", class: "min-w-0 max-w-[140px]" }}
+                      triggerProps={{ variant: "ghost", class: "!h-7 px-2 min-w-0 max-w-[140px] !text-[11px] !font-bold !border-0" }}
                     >
                       <Show when={local.model.current()?.provider?.id}>
-                        <ProviderIcon id={local.model.current()!.provider.id as IconName} class="size-4 shrink-0" />
+                        <ProviderIcon id={local.model.current()!.provider.id as IconName} class="size-3.5 grayscale opacity-60 mr-2" />
                       </Show>
-                      <span class="truncate max-w-[100px]">
+                      <span class="truncate max-w-[100px] text-[#4A4A4A] group-hover:text-[#E0E0E0]">
                         {local.model.current()?.name ?? language.t("dialog.model.select.title")}
                       </span>
-                      <Icon name="chevron-down" size="small" class="shrink-0" />
+                      <Icon name="chevron-down" size="small" class="ml-1 opacity-30" />
                     </ModelSelectorPopover>
                   </TooltipKeybind>
                 </Show>
+
                 <Show when={local.model.variant.list().length > 0}>
+                  <span class="text-[#111]">/</span>
                   <TooltipKeybind
                     placement="top"
                     gutter={8}
@@ -1978,13 +1978,14 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
                     <Button
                       data-action="model-variant-cycle"
                       variant="ghost"
-                      class="text-text-base _hidden group-hover/prompt-input:inline-block capitalize text-12-regular"
+                      class="!h-7 px-2 text-[#4A4A4A] hover:text-[#A3BE8C] !text-[11px] !font-bold !border-0 uppercase"
                       onClick={() => local.model.variant.cycle()}
                     >
                       {local.model.variant.current() ?? language.t("common.default")}
                     </Button>
                   </TooltipKeybind>
                 </Show>
+
                 <Show when={permission.permissionsEnabled() && params.id}>
                   <TooltipKeybind
                     placement="top"
@@ -1992,13 +1993,12 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
                     title={language.t("command.permissions.autoaccept.enable")}
                     keybind={command.keybind("permissions.autoaccept")}
                   >
-                    <Button
-                      variant="ghost"
+                    <button
                       onClick={() => permission.toggleAutoAccept(params.id!, sdk.directory)}
                       classList={{
-                        "_hidden group-hover/prompt-input:flex size-6 items-center justify-center": true,
-                        "text-text-base": !permission.isAutoAccepting(params.id!, sdk.directory),
-                        "hover:bg-surface-success-base": permission.isAutoAccepting(params.id!, sdk.directory),
+                        "flex size-7 items-center justify-center rounded-sm transition-colors border": true,
+                        "border-transparent text-[#2A2A2A] hover:text-[#4A4A4A]": !permission.isAutoAccepting(params.id!, sdk.directory),
+                        "border-[#A3BE8C]/30 bg-[#A3BE8C]/10 text-[#A3BE8C]": permission.isAutoAccepting(params.id!, sdk.directory),
                       }}
                       aria-label={
                         permission.isAutoAccepting(params.id!, sdk.directory)
@@ -2010,15 +2010,14 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
                       <Icon
                         name="chevron-double-right"
                         size="small"
-                        classList={{ "text-icon-success-base": permission.isAutoAccepting(params.id!, sdk.directory) }}
                       />
-                    </Button>
+                    </button>
                   </TooltipKeybind>
                 </Show>
               </Match>
             </Switch>
           </div>
-          <div class="flex items-center gap-1 shrink-0">
+          <div class="flex items-center gap-3 shrink-0">
             <input
               ref={fileInputRef}
               type="file"
@@ -2030,50 +2029,60 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
                 e.currentTarget.value = ""
               }}
             />
-            <div class="flex items-center gap-1 mr-1">
+            <div class="flex items-center gap-3 pr-2 border-r border-[#1A1A1A]">
               <SessionContextUsage />
               <Show when={store.mode === "normal"}>
                 <Tooltip placement="top" value={language.t("prompt.action.attachFile")}>
-                  <Button
+                  <button
                     type="button"
-                    variant="ghost"
-                    class="size-6 px-1"
+                    class="size-7 flex items-center justify-center text-[#4A4A4A] hover:text-[#E0E0E0] transition-colors"
                     onClick={() => fileInputRef.click()}
                     aria-label={language.t("prompt.action.attachFile")}
                   >
                     <Icon name="photo" class="size-4.5" />
-                  </Button>
+                  </button>
                 </Tooltip>
               </Show>
             </div>
+
             <Tooltip
               placement="top"
               inactive={!prompt.dirty() && !working()}
               value={
                 <Switch>
                   <Match when={working()}>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 font-mono text-[10px]">
                       <span>{language.t("prompt.action.stop")}</span>
-                      <span class="text-icon-base text-12-medium text-[10px]!">{language.t("common.key.esc")}</span>
+                      <span class="text-[#4A4A4A] px-1 bg-[#111] border border-[#222]">ESC</span>
                     </div>
                   </Match>
                   <Match when={true}>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 font-mono text-[10px]">
                       <span>{language.t("prompt.action.send")}</span>
-                      <Icon name="enter" size="small" class="text-icon-base" />
+                      <span class="text-[#4A4A4A] px-1 bg-[#111] border border-[#222]">ENTER</span>
                     </div>
                   </Match>
                 </Switch>
               }
             >
-              <IconButton
+              <button
                 type="submit"
                 disabled={!prompt.dirty() && !working()}
-                icon={working() ? "stop" : "arrow-up"}
-                variant="primary"
-                class="h-6 w-4.5"
+                classList={{
+                  "h-8 px-4 flex items-center justify-center rounded-sm transition-all text-[11px] font-bold uppercase tracking-widest": true,
+                  "bg-[#BF616A] text-[#050505] shadow-[0_0_15px_rgba(191,97,106,0.3)]": working(),
+                  "bg-[#A3BE8C] text-[#050505] shadow-[0_0_15px_rgba(163,190,140,0.3)]": !working() && prompt.dirty(),
+                  "bg-[#1A1A1A] text-[#4A4A4A] cursor-not-allowed": !prompt.dirty() && !working(),
+                }}
                 aria-label={working() ? language.t("prompt.action.stop") : language.t("prompt.action.send")}
-              />
+              >
+                <Show when={working()} fallback={language.t("prompt.action.send")}>
+                  <div class="flex items-center gap-2">
+                    <div class="size-2 bg-[#050505] animate-pulse" />
+                    <span>{language.t("prompt.action.stop")}</span>
+                  </div>
+                </Show>
+              </button>
             </Tooltip>
           </div>
         </div>

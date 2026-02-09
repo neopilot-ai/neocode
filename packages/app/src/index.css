@@ -1,1 +1,39 @@
 @import "@neocode-ai/ui/styles/tailwind";
+
+@layer base {
+    body {
+        @apply bg-[#050505] text-[#E0E0E0] font-mono antialiased selection:bg-[#A3BE8C] selection:text-[#050505];
+    }
+}
+
+@layer utilities {
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #1A1A1A;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #333;
+    }
+
+    .pane-border {
+        @apply border border-[#1A1A1A];
+    }
+
+    .text-glow {
+        text-shadow: 0 0 10px rgba(163, 190, 140, 0.2);
+    }
+}

@@ -135,7 +135,7 @@ export function Titlebar() {
 
   return (
     <header
-      class="h-10 shrink-0 bg-background-base relative grid grid-cols-[auto_minmax(0,1fr)_auto] items-center"
+      class="h-10 shrink-0 bg-[#0A0A0A] border-b border-[#1A1A1A] relative grid grid-cols-[auto_minmax(0,1fr)_auto] items-center font-mono"
       style={{ "min-height": minHeight() }}
     >
       <div
@@ -151,7 +151,7 @@ export function Titlebar() {
             <IconButton
               icon="menu"
               variant="ghost"
-              class="size-8 rounded-md"
+              class="size-8 rounded-md text-[#4A4A4A] hover:text-[#E0E0E0] hover:bg-[#1A1A1A]"
               onClick={layout.mobileSidebar.toggle}
               aria-label={language.t("sidebar.menu.toggle")}
             />
@@ -162,13 +162,13 @@ export function Titlebar() {
             <IconButton
               icon="menu"
               variant="ghost"
-              class="size-8 rounded-md"
+              class="size-8 rounded-md text-[#4A4A4A] hover:text-[#E0E0E0] hover:bg-[#1A1A1A]"
               onClick={layout.mobileSidebar.toggle}
               aria-label={language.t("sidebar.menu.toggle")}
             />
           </div>
         </Show>
-        <div class="flex items-center gap-3 shrink-0">
+        <div class="flex items-center gap-3 shrink-0 px-2">
           <TooltipKeybind
             class={web() ? "hidden xl:flex shrink-0 ml-14" : "hidden xl:flex shrink-0 ml-2"}
             placement="bottom"
@@ -177,7 +177,7 @@ export function Titlebar() {
           >
             <Button
               variant="ghost"
-              class="group/sidebar-toggle size-6 p-0"
+              class="group/sidebar-toggle size-6 p-0 text-[#4A4A4A] hover:text-[#A3BE8C] hover:bg-transparent"
               onClick={layout.sidebar.toggle}
               aria-label={language.t("command.sidebar.toggle")}
               aria-expanded={layout.sidebar.opened()}
@@ -202,7 +202,7 @@ export function Titlebar() {
               <Button
                 variant="ghost"
                 icon="arrow-left"
-                class="size-6 p-0"
+                class="size-6 p-0 text-[#4A4A4A] hover:text-[#E0E0E0] disabled:opacity-20"
                 disabled={!canBack()}
                 onClick={back}
                 aria-label={language.t("common.goBack")}
@@ -212,7 +212,7 @@ export function Titlebar() {
               <Button
                 variant="ghost"
                 icon="arrow-right"
-                class="size-6 p-0"
+                class="size-6 p-0 text-[#4A4A4A] hover:text-[#E0E0E0] disabled:opacity-20"
                 disabled={!canForward()}
                 onClick={forward}
                 aria-label={language.t("common.goForward")}
@@ -220,7 +220,7 @@ export function Titlebar() {
             </Tooltip>
           </div>
         </div>
-        <div id="neocode-titlebar-left" class="flex items-center gap-3 min-w-0 px-2" />
+        <div id="neocode-titlebar-left" class="flex items-center gap-3 min-w-0 px-2 text-[10px] text-[#4A4A4A] hover:text-[#E0E0E0] transition-colors" />
       </div>
 
       <div class="min-w-0 flex items-center justify-center pointer-events-none lg:absolute lg:inset-0 lg:flex lg:items-center lg:justify-center">
