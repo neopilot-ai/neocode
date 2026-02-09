@@ -16,8 +16,6 @@ let demoSoundState = {
   timeout: undefined as NodeJS.Timeout | undefined,
 }
 
-// To prevent audio from overlapping/playing very quickly when navigating the settings menus,
-// delay the playback by 100ms during quick selection changes and pause existing sounds.
 const playDemoSound = (src: string) => {
   if (demoSoundState.cleanup) {
     demoSoundState.cleanup()
@@ -60,24 +58,24 @@ export const SettingsGeneral: Component = () => {
         const actions =
           platform.update && platform.restart
             ? [
-                {
-                  label: language.t("toast.update.action.installRestart"),
-                  onClick: async () => {
-                    await platform.update!()
-                    await platform.restart!()
-                  },
+              {
+                label: language.t("toast.update.action.installRestart"),
+                onClick: async () => {
+                  await platform.update!()
+                  await platform.restart!()
                 },
-                {
-                  label: language.t("toast.update.action.notYet"),
-                  onClick: "dismiss" as const,
-                },
-              ]
+              },
+              {
+                label: language.t("toast.update.action.notYet"),
+                onClick: "dismiss" as const,
+              },
+            ]
             : [
-                {
-                  label: language.t("toast.update.action.notYet"),
-                  onClick: "dismiss" as const,
-                },
-              ]
+              {
+                label: language.t("toast.update.action.notYet"),
+                onClick: "dismiss" as const,
+              },
+            ]
 
         showToast({
           persistent: true,
@@ -130,19 +128,19 @@ export const SettingsGeneral: Component = () => {
   const soundOptions = [...SOUND_OPTIONS]
 
   return (
-    <div class="flex flex-col h-full overflow-y-auto no-scrollbar px-4 pb-10 sm:px-10 sm:pb-10">
-      <div class="sticky top-0 z-10 bg-[linear-gradient(to_bottom,var(--surface-raised-stronger-non-alpha)_calc(100%_-_24px),transparent)]">
-        <div class="flex flex-col gap-1 pt-6 pb-8">
-          <h2 class="text-16-medium text-text-strong">{language.t("settings.tab.general")}</h2>
-        </div>
+    <div class="flex flex-col h-full font-mono text-[#E0E0E0]">
+      <div class="sticky top-0 z-10 bg-[#050505] border-b border-[#1A1A1A] px-8 py-6">
+        <h2 class="text-xs font-bold text-[#E0E0E0] uppercase tracking-[0.2em] flex items-center gap-4">
+          <span class="text-[#A3BE8C]">///</span> {language.t("settings.tab.general")}
+        </h2>
       </div>
 
-      <div class="flex flex-col gap-8 w-full">
+      <div class="p-8 pb-20 space-y-12 max-w-4xl">
         {/* Appearance Section */}
-        <div class="flex flex-col gap-1">
-          <h3 class="text-14-medium text-text-strong pb-2">{language.t("settings.general.section.appearance")}</h3>
+        <section class="space-y-4">
+          <SectionHeader title={language.t("settings.general.section.appearance")} color="#88C0D0" />
 
-          <div class="bg-surface-raised-base px-4 rounded-lg">
+          <div class="border border-[#1A1A1A] bg-[#0A0A0A] divide-y divide-[#1A1A1A]">
             <SettingsRow
               title={language.t("settings.general.row.language.title")}
               description={language.t("settings.general.row.language.description")}
@@ -154,9 +152,7 @@ export const SettingsGeneral: Component = () => {
                 value={(o) => o.value}
                 label={(o) => o.label}
                 onSelect={(option) => option && language.setLocale(option.value)}
-                variant="secondary"
-                size="small"
-                triggerVariant="settings"
+                class="w-48"
               />
             </SettingsRow>
 
@@ -176,9 +172,7 @@ export const SettingsGeneral: Component = () => {
                   theme.previewColorScheme(option.value)
                   return () => theme.cancelPreview()
                 }}
-                variant="secondary"
-                size="small"
-                triggerVariant="settings"
+                class="w-48"
               />
             </SettingsRow>
 
@@ -206,9 +200,7 @@ export const SettingsGeneral: Component = () => {
                   theme.previewTheme(option.id)
                   return () => theme.cancelPreview()
                 }}
-                variant="secondary"
-                size="small"
-                triggerVariant="settings"
+                class="w-48"
               />
             </SettingsRow>
 
@@ -223,10 +215,8 @@ export const SettingsGeneral: Component = () => {
                 value={(o) => o.value}
                 label={(o) => language.t(o.label)}
                 onSelect={(option) => option && settings.appearance.setFont(option.value)}
-                variant="secondary"
-                size="small"
-                triggerVariant="settings"
                 triggerStyle={{ "font-family": monoFontFamily(settings.appearance.font()), "min-width": "180px" }}
+                class="w-48"
               >
                 {(option) => (
                   <span style={{ "font-family": monoFontFamily(option?.value) }}>
@@ -236,13 +226,13 @@ export const SettingsGeneral: Component = () => {
               </Select>
             </SettingsRow>
           </div>
-        </div>
+        </section>
 
         {/* System notifications Section */}
-        <div class="flex flex-col gap-1">
-          <h3 class="text-14-medium text-text-strong pb-2">{language.t("settings.general.section.notifications")}</h3>
+        <section class="space-y-4">
+          <SectionHeader title={language.t("settings.general.section.notifications")} color="#B48EAD" />
 
-          <div class="bg-surface-raised-base px-4 rounded-lg">
+          <div class="border border-[#1A1A1A] bg-[#0A0A0A] divide-y divide-[#1A1A1A]">
             <SettingsRow
               title={language.t("settings.general.notifications.agent.title")}
               description={language.t("settings.general.notifications.agent.description")}
@@ -279,13 +269,14 @@ export const SettingsGeneral: Component = () => {
               </div>
             </SettingsRow>
           </div>
-        </div>
+        </section>
+
 
         {/* Sound effects Section */}
-        <div class="flex flex-col gap-1">
-          <h3 class="text-14-medium text-text-strong pb-2">{language.t("settings.general.section.sounds")}</h3>
+        <section class="space-y-4">
+          <SectionHeader title={language.t("settings.general.section.sounds")} color="#EBCB8B" />
 
-          <div class="bg-surface-raised-base px-4 rounded-lg">
+          <div class="border border-[#1A1A1A] bg-[#0A0A0A] divide-y divide-[#1A1A1A]">
             <SettingsRow
               title={language.t("settings.general.sounds.agent.title")}
               description={language.t("settings.general.sounds.agent.description")}
@@ -305,9 +296,7 @@ export const SettingsGeneral: Component = () => {
                   settings.sounds.setAgent(option.id)
                   playDemoSound(option.src)
                 }}
-                variant="secondary"
-                size="small"
-                triggerVariant="settings"
+                class="w-48"
               />
             </SettingsRow>
 
@@ -330,9 +319,7 @@ export const SettingsGeneral: Component = () => {
                   settings.sounds.setPermissions(option.id)
                   playDemoSound(option.src)
                 }}
-                variant="secondary"
-                size="small"
-                triggerVariant="settings"
+                class="w-48"
               />
             </SettingsRow>
 
@@ -355,19 +342,17 @@ export const SettingsGeneral: Component = () => {
                   settings.sounds.setErrors(option.id)
                   playDemoSound(option.src)
                 }}
-                variant="secondary"
-                size="small"
-                triggerVariant="settings"
+                class="w-48"
               />
             </SettingsRow>
           </div>
-        </div>
+        </section>
 
         {/* Updates Section */}
-        <div class="flex flex-col gap-1">
-          <h3 class="text-14-medium text-text-strong pb-2">{language.t("settings.general.section.updates")}</h3>
+        <section class="space-y-4">
+          <SectionHeader title={language.t("settings.general.section.updates")} color="#BF616A" />
 
-          <div class="bg-surface-raised-base px-4 rounded-lg">
+          <div class="border border-[#1A1A1A] bg-[#0A0A0A] divide-y divide-[#1A1A1A]">
             <SettingsRow
               title={language.t("settings.updates.row.startup.title")}
               description={language.t("settings.updates.row.startup.description")}
@@ -399,7 +384,8 @@ export const SettingsGeneral: Component = () => {
             >
               <Button
                 size="small"
-                variant="secondary"
+                variant="ghost"
+                class="border border-[#1A1A1A] hover:bg-[#1A1A1A] text-xs font-bold uppercase tracking-wide"
                 disabled={store.checking || !platform.checkUpdate}
                 onClick={check}
               >
@@ -409,8 +395,17 @@ export const SettingsGeneral: Component = () => {
               </Button>
             </SettingsRow>
           </div>
-        </div>
+        </section>
       </div>
+    </div>
+  )
+}
+
+function SectionHeader(props: { title: string; color: string }) {
+  return (
+    <div class="flex items-center gap-2">
+      <div class="w-1 h-3" style={{ "background-color": props.color }} />
+      <h3 class="text-[10px] font-bold text-[#666] uppercase tracking-[0.15em]">{props.title}</h3>
     </div>
   )
 }
@@ -423,10 +418,10 @@ interface SettingsRowProps {
 
 const SettingsRow: Component<SettingsRowProps> = (props) => {
   return (
-    <div class="flex flex-wrap items-center justify-between gap-4 py-3 border-b border-border-weak-base last:border-none">
-      <div class="flex flex-col gap-0.5 min-w-0">
-        <span class="text-14-medium text-text-strong">{props.title}</span>
-        <span class="text-12-regular text-text-weak">{props.description}</span>
+    <div class="flex flex-wrap items-center justify-between gap-4 p-4 hover:bg-[#111] transition-colors group">
+      <div class="flex flex-col gap-1 min-w-0 max-w-[70%]">
+        <span class="text-xs font-bold text-[#E0E0E0] group-hover:text-white transition-colors">{props.title}</span>
+        <span class="text-[11px] text-[#666] leading-relaxed">{props.description}</span>
       </div>
       <div class="flex-shrink-0">{props.children}</div>
     </div>

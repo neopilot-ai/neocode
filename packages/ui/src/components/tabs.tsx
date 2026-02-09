@@ -6,7 +6,7 @@ export interface TabsProps extends ComponentProps<typeof Kobalte> {
   variant?: "normal" | "alt" | "pill" | "settings"
   orientation?: "horizontal" | "vertical"
 }
-export interface TabsListProps extends ComponentProps<typeof Kobalte.List> {}
+export interface TabsListProps extends ComponentProps<typeof Kobalte.List> { }
 export interface TabsTriggerProps extends ComponentProps<typeof Kobalte.Trigger> {
   classes?: {
     button?: string
@@ -15,7 +15,7 @@ export interface TabsTriggerProps extends ComponentProps<typeof Kobalte.Trigger>
   closeButton?: JSX.Element
   onMiddleClick?: () => void
 }
-export interface TabsContentProps extends ComponentProps<typeof Kobalte.Content> {}
+export interface TabsContentProps extends ComponentProps<typeof Kobalte.Content> { }
 
 function TabsRoot(props: TabsProps) {
   const [split, rest] = splitProps(props, ["class", "classList", "variant", "orientation"])
@@ -106,8 +106,20 @@ function TabsContent(props: ParentProps<TabsContentProps>) {
   )
 }
 
-const TabsSectionTitle: Component<ParentProps> = (props) => {
-  return <div data-slot="tabs-section-title">{props.children}</div>
+const TabsSectionTitle: Component<ParentProps<ComponentProps<"div">>> = (props) => {
+  const [local, rest] = splitProps(props, ["class", "classList", "children"])
+  return (
+    <div
+      data-slot="tabs-section-title"
+      classList={{
+        ...(local.classList ?? {}),
+        [local.class ?? ""]: !!local.class,
+      }}
+      {...rest}
+    >
+      {local.children}
+    </div>
+  )
 }
 
 export const Tabs = Object.assign(TabsRoot, {

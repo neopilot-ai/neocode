@@ -3,7 +3,6 @@ import { createStore } from "solid-js/store"
 import { Button } from "@neocode-ai/ui/button"
 import { Icon } from "@neocode-ai/ui/icon"
 import { IconButton } from "@neocode-ai/ui/icon-button"
-import { TextField } from "@neocode-ai/ui/text-field"
 import { showToast } from "@neocode-ai/ui/toast"
 import fuzzysort from "fuzzysort"
 import { formatKeybind, parseKeybind, useCommand } from "@/context/command"
@@ -38,6 +37,15 @@ const groupKey: Record<KeybindGroup, GroupKey> = {
   "Model and agent": "settings.shortcuts.group.modelAndAgent",
   Terminal: "settings.shortcuts.group.terminal",
   Prompt: "settings.shortcuts.group.prompt",
+}
+
+const groupColor: Record<KeybindGroup, string> = {
+  General: "#88C0D0", // Cyan
+  Session: "#A3BE8C", // Green
+  Navigation: "#EBCB8B", // Yellow
+  "Model and agent": "#B48EAD", // Purple
+  Terminal: "#D08770", // Orange
+  Prompt: "#BF616A", // Red
 }
 
 function groupFor(id: string): KeybindGroup {
@@ -352,84 +360,131 @@ export const SettingsKeybinds: Component = () => {
   })
 
   return (
-    <div class="flex flex-col h-full overflow-y-auto no-scrollbar px-4 pb-10 sm:px-10 sm:pb-10">
-      <div class="sticky top-0 z-10 bg-[linear-gradient(to_bottom,var(--surface-raised-stronger-non-alpha)_calc(100%_-_24px),transparent)]">
-        <div class="flex flex-col gap-4 pt-6 pb-6 max-w-[720px]">
-          <div class="flex items-center justify-between gap-4">
-            <h2 class="text-16-medium text-text-strong">{language.t("settings.shortcuts.title")}</h2>
-            <Button size="small" variant="secondary" onClick={resetAll} disabled={!hasOverrides()}>
+    <div class="flex flex-col h-full font-mono text-[#E0E0E0]">
+      <div class="sticky top-0 z-10 bg-[#050505] border-b border-[#1A1A1A] px-8 py-6">
+        <h2 class="text-xs font-bold text-[#E0E0E0] uppercase tracking-[0.2em] flex items-center gap-4 mb-6">
+          <span class="text-[#88C0D0]">///</span> {language.t("settings.shortcuts.title")}
+        </h2>
+
+        <div class="flex flex-col gap-4">
+          {/* Search & Actions Bar */}
+          <div class="flex items-center gap-4">
+            <div class="flex-1 flex items-center gap-3 px-3 h-10 bg-[#0A0A0A] border border-[#1A1A1A] focus-within:border-[#88C0D0] transition-colors">
+              <Icon name="magnifying-glass" class="text-[#4A4A4A] size-4 flex-shrink-0" />
+              <input
+                type="text"
+                value={store.filter}
+                onInput={(e) => setStore("filter", e.currentTarget.value)}
+                placeholder={language.t("settings.shortcuts.search.placeholder")}
+                spellcheck={false}
+                class="flex-1 bg-transparent border-none outline-none text-xs text-[#E0E0E0] placeholder:text-[#4A4A4A]"
+              />
+              <Show when={store.filter}>
+                <button onClick={() => setStore("filter", "")} class="text-[#4A4A4A] hover:text-[#E0E0E0]">
+                  <Icon name="circle-x" class="size-4" />
+                </button>
+              </Show>
+            </div>
+
+            <Button
+              size="small"
+              variant="ghost"
+              onClick={resetAll}
+              disabled={!hasOverrides()}
+              class="border border-[#1A1A1A] hover:bg-[#1A1A1A] text-xs font-bold uppercase tracking-wide h-10 px-4"
+            >
               {language.t("settings.shortcuts.reset.button")}
             </Button>
-          </div>
-
-          <div class="flex items-center gap-2 px-3 h-9 rounded-lg bg-surface-base">
-            <Icon name="magnifying-glass" class="text-icon-weak-base flex-shrink-0" />
-            <TextField
-              variant="ghost"
-              type="text"
-              value={store.filter}
-              onChange={(v) => setStore("filter", v)}
-              placeholder={language.t("settings.shortcuts.search.placeholder")}
-              spellcheck={false}
-              autocorrect="off"
-              autocomplete="off"
-              autocapitalize="off"
-              class="flex-1"
-            />
-            <Show when={store.filter}>
-              <IconButton icon="circle-x" variant="ghost" onClick={() => setStore("filter", "")} />
-            </Show>
           </div>
         </div>
       </div>
 
-      <div class="flex flex-col gap-8 max-w-[720px]">
+      <div class="p-8 pb-20 space-y-12 max-w-4xl">
         <For each={GROUPS}>
           {(group) => (
             <Show when={(filtered().get(group) ?? []).length > 0}>
-              <div class="flex flex-col gap-1">
-                <h3 class="text-14-medium text-text-strong pb-2">{language.t(groupKey[group])}</h3>
-                <div class="bg-surface-raised-base px-4 rounded-lg">
+              <section class="space-y-4">
+                <div class="flex items-center gap-2">
+                  <div class="w-1 h-3" style={{ "background-color": groupColor[group] }} />
+                  <h3 class="text-[10px] font-bold text-[#666] uppercase tracking-[0.15em]">{language.t(groupKey[group])}</h3>
+                </div>
+
+                <div class="border border-[#1A1A1A] bg-[#0A0A0A] divide-y divide-[#1A1A1A]">
                   <For each={filtered().get(group) ?? []}>
                     {(id) => (
-                      <div class="flex items-center justify-between gap-4 py-3 border-b border-border-weak-base last:border-none">
-                        <span class="text-14-regular text-text-strong">{title(id)}</span>
-                        <button
-                          type="button"
+                      <div class="flex items-center justify-between gap-4 p-3 hover:bg-[#111] transition-colors group">
+                        <span class="text-xs font-bold text-[#E0E0E0] group-hover:text-white transition-colors">{title(id)}</span>
+                        <div
                           data-keybind-id={id}
-                          classList={{
-                            "h-8 px-3 rounded-md text-12-regular": true,
-                            "bg-surface-base text-text-subtle hover:bg-surface-raised-base-hover active:bg-surface-raised-base-active":
-                              store.active !== id,
-                            "border border-border-weak-base bg-surface-inset-base text-text-weak": store.active === id,
-                          }}
+                          class="cursor-pointer"
                           onClick={() => start(id)}
                         >
                           <Show
                             when={store.active === id}
-                            fallback={command.keybind(id) || language.t("settings.shortcuts.unassigned")}
+                            fallback={
+                              <div class="flex items-center gap-1">
+                                <Show when={command.keybind(id)} fallback={
+                                  <span class="text-[10px] uppercase tracking-wide text-[#4A4A4A]">{language.t("settings.shortcuts.unassigned")}</span>
+                                }>
+                                  {(k) => <KeybindDisplay keybind={k()} />}
+                                </Show>
+                              </div>
+                            }
                           >
-                            {language.t("settings.shortcuts.pressKeys")}
+                            <div class="flex items-center gap-2 text-[#88C0D0] animate-pulse">
+                              <span class="text-[10px] font-bold uppercase tracking-wider">{language.t("settings.shortcuts.pressKeys")}</span>
+                              <Icon name="keyboard" class="size-4" />
+                            </div>
                           </Show>
-                        </button>
+                        </div>
                       </div>
                     )}
                   </For>
                 </div>
-              </div>
+              </section>
             </Show>
           )}
         </For>
 
         <Show when={store.filter && !hasResults()}>
-          <div class="flex flex-col items-center justify-center py-12 text-center">
-            <span class="text-14-regular text-text-weak">{language.t("settings.shortcuts.search.empty")}</span>
+          <div class="flex flex-col items-center justify-center py-12 text-center border border-dashed border-[#1A1A1A] rounded-lg">
+            <span class="text-xs text-[#666]">{language.t("settings.shortcuts.search.empty")}</span>
             <Show when={store.filter}>
-              <span class="text-14-regular text-text-strong mt-1">"{store.filter}"</span>
+              <span class="text-xs text-[#E0E0E0] font-bold mt-2">"{store.filter}"</span>
             </Show>
           </div>
         </Show>
       </div>
+    </div>
+  )
+}
+
+function KeybindDisplay(props: { keybind: string }) {
+  const parts = createMemo(() => {
+    return props.keybind.split("+").map(p => {
+      if (p === "mod") return IS_MAC ? "CMD" : "CTRL"
+      if (p === "ctrl") return "CTRL"
+      if (p === "shift") return "SHIFT"
+      if (p === "alt") return "ALT"
+      if (p === "meta") return "META"
+      return p.toUpperCase()
+    })
+  })
+
+  return (
+    <div class="flex items-center gap-1.5">
+      <For each={parts()}>
+        {(part, i) => (
+          <>
+            <span class="px-1.5 py-0.5 rounded bg-[#1A1A1A] border border-[#2A2A2A] text-[10px] font-bold text-[#A3BE8C] font-mono min-w-[24px] text-center shadow-sm">
+              {part}
+            </span>
+            <Show when={i() < parts.length - 1}>
+              <span class="text-[#4A4A4A] text-[10px]">+</span>
+            </Show>
+          </>
+        )}
+      </For>
     </div>
   )
 }
