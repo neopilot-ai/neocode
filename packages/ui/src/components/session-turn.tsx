@@ -611,6 +611,7 @@ export function SessionTurn(
                       <Show when={working() || hasSteps()}>
                         <div data-slot="session-turn-response-trigger" class="my-6">
                           <button
+                            type="button"
                             data-expandable={assistantMessages().length > 0}
                             class="flex items-center gap-3 px-3 py-1.5 bg-[#0A0A0A] border border-[#1A1A1A] rounded-sm hover:border-[#A3BE8C]/30 transition-all text-[#4A4A4A] group"
                             onClick={props.onStepsExpandedToggle ?? (() => { })}
@@ -758,33 +759,42 @@ export function SessionTurn(
                             </div>
                             <div class="space-y-3">
                               <For each={messageDiffs().slice(0, store.diffLimit)}>
-                                {(diff) => (
-                                  <div class="space-y-2">
-                                    <div
-                                      class="flex items-center justify-between p-2 bg-[#0A0A0A] border border-[#1A1A1A] cursor-pointer hover:bg-[#111] transition-colors"
-                                      onClick={() => {
-                                        const isOpen = store.diffsOpen.includes(diff.file)
-                                        if (isOpen) setStore("diffsOpen", (prev) => prev.filter((p) => p !== diff.file))
-                                        else setStore("diffsOpen", (prev) => [...prev, diff.file])
-                                      }}
-                                    >
-                                      <div class="flex items-center gap-3">
-                                        <span class="text-[10px] text-[#4A4A4A] font-bold">[{store.diffsOpen.includes(diff.file) ? "-" : "+"}]</span>
-                                        <span class="text-[11px] text-[#E0E0E0] truncate max-w-[300px]">{diff.file}</span>
-                                      </div>
-                                      <DiffChanges changes={diff} variant="bars" class="h-3" />
+                                {(diff, i) => {
+                                  const contentId = `diff-content-${i()}`
+                                  return (
+                                    <div class="space-y-2">
+                                      <button
+                                        type="button"
+                                        class="flex items-center justify-between w-full p-2 bg-[#0A0A0A] border border-[#1A1A1A] cursor-pointer hover:bg-[#111] transition-colors"
+                                        aria-expanded={store.diffsOpen.includes(diff.file)}
+                                        aria-controls={contentId}
+                                        onClick={() => {
+                                          const isOpen = store.diffsOpen.includes(diff.file)
+                                          if (isOpen) setStore("diffsOpen", (prev) => prev.filter((p) => p !== diff.file))
+                                          else setStore("diffsOpen", (prev) => [...prev, diff.file])
+                                        }}
+                                      >
+                                        <div class="flex items-center gap-3">
+                                          <span class="text-[10px] text-[#4A4A4A] font-bold">[{store.diffsOpen.includes(diff.file) ? "-" : "+"}]</span>
+                                          <span class="text-[11px] text-[#E0E0E0] truncate max-w-[300px]">{diff.file}</span>
+                                        </div>
+                                        <DiffChanges changes={diff} variant="bars" class="h-3" />
+                                      </button>
+                                      <Show when={store.diffsOpen.includes(diff.file)}>
+                                        <div
+                                          id={contentId}
+                                          class="border border-[#1A1A1A] border-t-0 bg-[#050505] p-1 overflow-x-auto custom-scrollbar"
+                                        >
+                                          <Dynamic
+                                            component={diffComponent}
+                                            before={{ name: diff.file, contents: typeof diff.before === "string" ? diff.before : "" }}
+                                            after={{ name: diff.file, contents: typeof diff.after === "string" ? diff.after : "" }}
+                                          />
+                                        </div>
+                                      </Show>
                                     </div>
-                                    <Show when={store.diffsOpen.includes(diff.file)}>
-                                      <div class="border border-[#1A1A1A] border-t-0 bg-[#050505] p-1 overflow-x-auto custom-scrollbar">
-                                        <Dynamic
-                                          component={diffComponent}
-                                          before={{ name: diff.file, contents: typeof diff.before === "string" ? diff.before : "" }}
-                                          after={{ name: diff.file, contents: typeof diff.after === "string" ? diff.after : "" }}
-                                        />
-                                      </div>
-                                    </Show>
-                                  </div>
-                                )}
+                                  )
+                                }}
                               </For>
                             </div>
                             <Show when={messageDiffs().length > store.diffLimit}>

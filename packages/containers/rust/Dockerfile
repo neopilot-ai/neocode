@@ -11,17 +11,17 @@ ENV PATH=${CARGO_HOME}/bin:${PATH}
 # Enable sccache wrapper by default
 ENV RUSTC_WRAPPER=sccache
 
-# Install essential build dependencies
-# clang/lld for faster linking, pkg-config/libssl-dev for common crate deps
+# Install essential build dependencies with pinned versions for reproducibility
+# Versions targeted for Ubuntu 24.04 (Noble)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-  build-essential \
+  build-essential=12.10ubuntu* \
   ca-certificates \
-  curl \
-  git \
-  libssl-dev \
-  pkg-config \
-  clang \
-  lld \
+  curl=8.5.0-2ubuntu10* \
+  git=1:2.43.0-1ubuntu7* \
+  libssl-dev=3.0.13-0ubuntu3* \
+  pkg-config=1.8.1-2build1 \
+  clang=1:18.0-59* \
+  lld=1:18.0-59* \
   && rm -rf /var/lib/apt/lists/*
 
 # Install sccache for distinct architectures
@@ -37,10 +37,28 @@ RUN set -eux; \
   chmod +x /usr/local/bin/sccache; \
   sccache --version
 
-# Install Rust toolchain
+# Create build user and configure permissions
+RUN groupadd -r builder && useradd -r -g builder -m -d /home/builder builder && \
+  mkdir -p ${CARGO_HOME} ${RUSTUP_HOME} && \
+  chown -R builder:builder ${CARGO_HOME} ${RUSTUP_HOME}
+
+# Switch to build user
+USER builder
+
+# Install Rust toolchain securely
 RUN set -eux; \
-  curl -fsSL https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain "${RUST_TOOLCHAIN}"; \
-  chmod -R a+w ${RUSTUP_HOME} ${CARGO_HOME}; \
+  ARCH=$(uname -m); \
+  case "$ARCH" in \
+  x86_64) RUSTUP_ARCH="x86_64-unknown-linux-gnu" ;; \
+  aarch64) RUSTUP_ARCH="aarch64-unknown-linux-gnu" ;; \
+  *) echo "Unsupported architecture: $ARCH"; exit 1 ;; \
+  esac; \
+  curl -fsSLO "https://static.rust-lang.org/rustup/dist/${RUSTUP_ARCH}/rustup-init"; \
+  curl -fsSLO "https://static.rust-lang.org/rustup/dist/${RUSTUP_ARCH}/rustup-init.sha256"; \
+  echo "$(cat rustup-init.sha256) *rustup-init" | sha256sum -c -; \
+  chmod +x rustup-init; \
+  ./rustup-init -y --profile minimal --default-toolchain "${RUST_TOOLCHAIN}"; \
+  rm rustup-init rustup-init.sha256; \
   rustup component add clippy rustfmt; \
   rustc --version; \
   cargo --version

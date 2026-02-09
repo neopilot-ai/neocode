@@ -110,12 +110,12 @@ const TabsSectionTitle: Component<ParentProps<ComponentProps<"div">>> = (props) 
   const [local, rest] = splitProps(props, ["class", "classList", "children"])
   return (
     <div
+      {...rest}
       data-slot="tabs-section-title"
       classList={{
         ...(local.classList ?? {}),
         [local.class ?? ""]: !!local.class,
       }}
-      {...rest}
     >
       {local.children}
     </div>
