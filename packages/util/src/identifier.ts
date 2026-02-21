@@ -18,9 +18,18 @@ export namespace Identifier {
   function randomBase62(length: number): string {
     const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
     let result = ""
-    const bytes = randomBytes(length)
-    for (let i = 0; i < length; i++) {
-      result += chars[bytes[i] % 62]
+    // Use rejection sampling to avoid modulo bias when mapping bytes to base62.
+    // 248 is the largest multiple of 62 less than 256 (62 * 4 = 248), so we
+    // discard any byte >= 248 and only use values in [0, 247].
+    while (result.length < length) {
+      const bytes = randomBytes(length)
+      for (let i = 0; i < bytes.length && result.length < length; i++) {
+        const byte = bytes[i]
+        if (byte >= 248) {
+          continue
+        }
+        result += chars[byte % 62]
+      }
     }
     return result
   }
