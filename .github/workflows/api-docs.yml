@@ -1,0 +1,49 @@
+name: API Documentation
+
+on:
+  push:
+    branches: [main, dev]
+    paths: ['services/api/src/**']
+  pull_request:
+    branches: [main, dev]
+    paths: ['services/api/src/**']
+  workflow_dispatch:
+
+jobs:
+  generate-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-bun
+
+      - name: Install dependencies
+        working-directory: services/api
+        run: bun install
+
+      - name: Generate API documentation
+        working-directory: services/api
+        run: |
+          bun run docs:generate > docs.json
+          echo "API documentation generated"
+
+      - name: Validate OpenAPI spec
+        working-directory: services/api
+        run: |
+          bun x @apidevtools/swagger-parser validate docs.json
+
+      - name: Upload documentation artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-docs
+          path: services/api/docs.json
+          retention-days: 30
+
+      - name: Deploy to GitHub Pages
+        if: github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./services/api
+          publish_branch: gh-pages
+          destination_dir: api-docs
