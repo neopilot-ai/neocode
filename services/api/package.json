@@ -6,7 +6,10 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "docs:generate": "bun run src/api-docs.ts",
+    "docs:serve": "bun run src/api-docs.ts & sleep 2 && open http://localhost:4096/swagger"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "catalog:",
@@ -18,6 +21,8 @@
     "@octokit/auth-app": "8.0.1",
     "@octokit/rest": "catalog:",
     "hono": "catalog:",
+    "@hono/swagger-ui": "^0.4.1",
+    "@hono/zod-openapi": "^0.17.0",
     "jose": "6.0.11"
   }
 }
