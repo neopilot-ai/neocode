@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@neocode-ai/plugin": "*"
+  },
+  "scripts": {
+    "validate": "bun run validate-extensions.ts",
+    "validate:fix": "echo 'Run validation and fix reported issues'"
+  }
+}
