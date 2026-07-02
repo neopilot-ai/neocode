@@ -26,7 +26,7 @@
     "./*": "./src/*.ts"
   },
   "devDependencies": {
-    "@babel/core": "7.28.4",
+    "@babel/core": "7.29.6",
     "@jridgewell/resolve-uri": "3.1.2",
     "@neocode-ai/tool-cli": "workspace:*",
     "@neocode-ai/tool-tsconfig": "workspace:*",
