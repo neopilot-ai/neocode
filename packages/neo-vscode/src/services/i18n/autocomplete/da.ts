@@ -1,0 +1,47 @@
+export const dict = {
+  "neocode:autocomplete.statusBar.enabled": "$(neo-logo) Autofuldførelse",
+  "neocode:autocomplete.statusBar.snoozed": "udsat",
+  "neocode:autocomplete.statusBar.warning": "$(warning) Autofuldførelse",
+  "neocode:autocomplete.statusBar.tooltip.basic": "Neo Code autofuldførelse",
+  "neocode:autocomplete.statusBar.tooltip.disabled": "Neo Code autofuldførelse (deaktiveret)",
+  "neocode:autocomplete.statusBar.tooltip.noUsableProvider":
+    "**Ingen autocomplete-model konfigureret**\n\nFor at aktivere autocomplete skal du tilføje en profil med en af disse understøttede udbydere: {{providers}}.\n\n[Åbn indstillinger]({{command}})",
+  "neocode:autocomplete.statusBar.tooltip.sessionTotal": "Samlet sessionsomkostning:",
+  "neocode:autocomplete.statusBar.tooltip.provider": "Udbyder:",
+  "neocode:autocomplete.statusBar.tooltip.model": "Model:",
+  "neocode:autocomplete.statusBar.tooltip.profile": "Profil: ",
+  "neocode:autocomplete.statusBar.tooltip.defaultProfile": "Standard",
+  "neocode:autocomplete.statusBar.tooltip.completionSummary":
+    "Udførte {{count}} fuldførelser mellem {{startTime}} og {{endTime}}, til en samlet pris på {{cost}}.",
+  "neocode:autocomplete.statusBar.tooltip.providerInfo": "Autocomplete leveres af {{model}} via {{provider}}.",
+  "neocode:autocomplete.statusBar.cost.zero": "$0.00",
+  "neocode:autocomplete.statusBar.cost.lessThanCent": "<$0.01",
+  "neocode:autocomplete.toggleMessage": "Neo Code autofuldførelse {{status}}",
+  "neocode:autocomplete.progress.title": "Neo Code",
+  "neocode:autocomplete.progress.analyzing": "Analyserer din kode...",
+  "neocode:autocomplete.progress.generating": "Genererer foreslåede redigeringer...",
+  "neocode:autocomplete.progress.processing": "Behandler foreslåede redigeringer...",
+  "neocode:autocomplete.progress.showing": "Viser foreslåede redigeringer...",
+  "neocode:autocomplete.input.title": "Neo Code: Hurtig opgave",
+  "neocode:autocomplete.input.placeholder": "f.eks. 'refaktorer denne funktion, så den bliver mere effektiv'",
+  "neocode:autocomplete.commands.generateSuggestions": "Neo Code: Generer foreslåede redigeringer",
+  "neocode:autocomplete.commands.displaySuggestions": "Vis foreslåede redigeringer",
+  "neocode:autocomplete.commands.cancelSuggestions": "Annuller foreslåede redigeringer",
+  "neocode:autocomplete.commands.applyCurrentSuggestion": "Anvend aktuel foreslået redigering",
+  "neocode:autocomplete.commands.applyAllSuggestions": "Anvend alle foreslåede redigeringer",
+  "neocode:autocomplete.commands.category": "Neo Code",
+  "neocode:autocomplete.codeAction.title": "Neo Code: Foreslåede redigeringer",
+  "neocode:autocomplete.chatParticipant.fullName": "Neo Code-agent",
+  "neocode:autocomplete.chatParticipant.name": "Agent",
+  "neocode:autocomplete.chatParticipant.description":
+    "Jeg kan hjælpe dig med hurtige opgaver og foreslåede redigeringer.",
+  "neocode:autocomplete.incompatibilityExtensionPopup.message":
+    "Neo Code autofuldførelse blokeres af en konflikt med GitHub Copilot. For at løse dette skal du deaktivere Copilots inline-forslag.",
+  "neocode:autocomplete.incompatibilityExtensionPopup.disableCopilot": "Deaktiver Copilot",
+  "neocode:autocomplete.incompatibilityExtensionPopup.disableInlineAssist": "Deaktiver Autocomplete",
+  "neocode:autocomplete.creditsExhausted.message":
+    "Neo Code autofuldførelse er sat på pause. Mulige årsager: din Neo-konto har ingen resterende credits, eller din konfigurerede API-nøgle (BYOK) har nået sin kvotegrænse. Tilføj Neo-credits eller kontroller din API-nøglekonfiguration for at genoptage autocomplete.",
+  "neocode:autocomplete.creditsExhausted.addCredits": "Tilføj credits",
+  "neocode:autocomplete.authError.message":
+    "Neo Code autofuldførelse er sat på pause på grund af et godkendelsesproblem. Mulige årsager: du er ikke logget ind på Neo, eller din API-nøgle (BYOK) er ugyldig eller mangler. Log ind igen, eller kontroller indstillingerne for udbyderens API-nøgle.",
+}

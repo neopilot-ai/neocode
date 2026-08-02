@@ -1,12 +1,14 @@
 name: "Setup Git Committer"
 description: "Create app token and configure git user"
 inputs:
-  neocode-app-id:
-    description: "NeoCode GitHub App ID"
+  # neocode_change start
+  neo-maintainer-app-id:
+    description: "Neo Maintainer GitHub App ID"
     required: true
-  neocode-app-secret:
-    description: "NeoCode GitHub App private key"
+  neo-maintainer-app-secret:
+    description: "Neo Maintainer GitHub App private key"
     required: true
+  # neocode_change end
 outputs:
   token:
     description: "GitHub App token"
@@ -19,10 +21,12 @@ runs:
   steps:
     - name: Create app token
       id: apptoken
-      uses: actions/create-github-app-token@v2
+      uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2.2.2
       with:
-        app-id: ${{ inputs.neocode-app-id }}
-        private-key: ${{ inputs.neocode-app-secret }}
+        # neocode_change start
+        app-id: ${{ inputs['neo-maintainer-app-id'] }}
+        private-key: ${{ inputs['neo-maintainer-app-secret'] }}
+        # neocode_change end
         owner: ${{ github.repository_owner }}
 
     - name: Configure git user
@@ -35,6 +39,15 @@ runs:
     - name: Clear checkout auth
       run: |
         git config --local --unset-all http.https://github.com/.extraheader || true
+        # neocode_change start
+        keys="$(git config --local --name-only --get-regexp '^includeIf\.gitdir:' || true)"
+        for key in $keys; do
+          path="$(git config --local --get "$key" || true)"
+          case "$path" in
+            *git-credentials-*.config) git config --local --unset-all "$key" || true ;;
+          esac
+        done
+        # neocode_change end
       shell: bash
 
     - name: Configure git remote

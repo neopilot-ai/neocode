@@ -1,0 +1,47 @@
+export const dict = {
+  "neocode:autocomplete.statusBar.enabled": "$(neo-logo) Autocompletado",
+  "neocode:autocomplete.statusBar.snoozed": "pospuesto",
+  "neocode:autocomplete.statusBar.warning": "$(warning) Autocompletado",
+  "neocode:autocomplete.statusBar.tooltip.basic": "Autocompletado de Neo Code",
+  "neocode:autocomplete.statusBar.tooltip.disabled": "Autocompletado de Neo Code (deshabilitado)",
+  "neocode:autocomplete.statusBar.tooltip.noUsableProvider":
+    "**No hay ningún modelo de autocompletado configurado**\n\nPara habilitar el autocompletado, añade un perfil con uno de estos proveedores compatibles: {{providers}}.\n\n[Abrir configuración]({{command}})",
+  "neocode:autocomplete.statusBar.tooltip.sessionTotal": "Coste total de la sesión:",
+  "neocode:autocomplete.statusBar.tooltip.provider": "Proveedor:",
+  "neocode:autocomplete.statusBar.tooltip.model": "Modelo:",
+  "neocode:autocomplete.statusBar.tooltip.profile": "Perfil: ",
+  "neocode:autocomplete.statusBar.tooltip.defaultProfile": "Predeterminado",
+  "neocode:autocomplete.statusBar.tooltip.completionSummary":
+    "Se realizaron {{count}} completados entre {{startTime}} y {{endTime}}, con un coste total de {{cost}}.",
+  "neocode:autocomplete.statusBar.tooltip.providerInfo":
+    "Autocompletados proporcionados por {{model}} mediante {{provider}}.",
+  "neocode:autocomplete.statusBar.cost.zero": "$0.00",
+  "neocode:autocomplete.statusBar.cost.lessThanCent": "<$0.01",
+  "neocode:autocomplete.toggleMessage": "Autocompletado de Neo Code {{status}}",
+  "neocode:autocomplete.progress.title": "Neo Code",
+  "neocode:autocomplete.progress.analyzing": "Analizando tu código...",
+  "neocode:autocomplete.progress.generating": "Generando ediciones sugeridas...",
+  "neocode:autocomplete.progress.processing": "Procesando ediciones sugeridas...",
+  "neocode:autocomplete.progress.showing": "Mostrando ediciones sugeridas...",
+  "neocode:autocomplete.input.title": "Neo Code: Tarea rápida",
+  "neocode:autocomplete.input.placeholder": "p. ej., 'refactoriza esta función para que sea más eficiente'",
+  "neocode:autocomplete.commands.generateSuggestions": "Neo Code: Generar ediciones sugeridas",
+  "neocode:autocomplete.commands.displaySuggestions": "Mostrar ediciones sugeridas",
+  "neocode:autocomplete.commands.cancelSuggestions": "Cancelar ediciones sugeridas",
+  "neocode:autocomplete.commands.applyCurrentSuggestion": "Aplicar edición sugerida actual",
+  "neocode:autocomplete.commands.applyAllSuggestions": "Aplicar todas las ediciones sugeridas",
+  "neocode:autocomplete.commands.category": "Neo Code",
+  "neocode:autocomplete.codeAction.title": "Neo Code: Ediciones sugeridas",
+  "neocode:autocomplete.chatParticipant.fullName": "Agente de Neo Code",
+  "neocode:autocomplete.chatParticipant.name": "Agente",
+  "neocode:autocomplete.chatParticipant.description": "Puedo ayudarte con tareas rápidas y ediciones sugeridas.",
+  "neocode:autocomplete.incompatibilityExtensionPopup.message":
+    "El autocompletado de Neo Code está bloqueado por un conflicto con GitHub Copilot. Para solucionarlo, debes deshabilitar las sugerencias en línea de Copilot.",
+  "neocode:autocomplete.incompatibilityExtensionPopup.disableCopilot": "Deshabilitar Copilot",
+  "neocode:autocomplete.incompatibilityExtensionPopup.disableInlineAssist": "Deshabilitar autocompletado",
+  "neocode:autocomplete.creditsExhausted.message":
+    "El autocompletado de Neo Code se ha pausado. Posibles causas: tu cuenta de Neo no tiene créditos restantes, o tu clave de API configurada (BYOK) alcanzó su límite de cuota. Agrega créditos de Neo o revisa la configuración de tu clave de API para reanudar el autocompletado.",
+  "neocode:autocomplete.creditsExhausted.addCredits": "Añadir créditos",
+  "neocode:autocomplete.authError.message":
+    "El autocompletado de Neo Code se ha pausado por un problema de autenticación. Posibles causas: no has iniciado sesión en Neo, o tu clave de API (BYOK) no es válida o falta. Vuelve a iniciar sesión o revisa la configuración de la clave de API de tu proveedor.",
+}

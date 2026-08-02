@@ -1,0 +1,34 @@
+name: release-github-action
+
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - "github/**"
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0
+
+      - run: git fetch --force --tags
+
+      - name: Setup Git Committer
+        id: committer
+        uses: ./.github/actions/setup-git-committer
+        with:
+          neo-maintainer-app-id: ${{ secrets.NEO_MAINTAINER_APP_ID }}
+          neo-maintainer-app-secret: ${{ secrets.NEO_MAINTAINER_APP_SECRET }}
+
+      - name: Release
+        run: |
+          ./github/script/release

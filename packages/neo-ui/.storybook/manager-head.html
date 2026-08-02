@@ -1,0 +1,11 @@
+<style>
+  /* Hide Color Scheme toolbar when neo-vscode theme is active */
+  html[data-neo-theme="neo-vscode"] [aria-label^="Color Scheme"] {
+    display: none !important;
+  }
+
+  /* Hide VS Code Theme toolbar by default and when neo theme is active */
+  html:not([data-neo-theme="neo-vscode"]) [aria-label^="VSCode Theme"] {
+    display: none !important;
+  }
+</style>

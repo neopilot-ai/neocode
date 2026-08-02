@@ -20,10 +20,10 @@ body:
       required: false
 
   - type: input
-    id: neocode-version
+    id: neo-version
     attributes:
-      label: NeoCode version
-      description: What version of NeoCode are you using?
+      label: Neo version
+      description: What version of Neo are you using?
     validations:
       required: false
 

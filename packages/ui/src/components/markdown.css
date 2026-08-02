@@ -6,7 +6,7 @@
   color: var(--text-strong);
   font-family: var(--font-family-sans);
   font-size: var(--font-size-base); /* 14px */
-  line-height: var(--line-height-x-large);
+  line-height: 160%;
 
   /* Spacing for flow */
   > *:first-child {
@@ -23,11 +23,11 @@
   h4,
   h5,
   h6 {
-    font-size: var(--font-size-base);
+    font-size: 14px;
     color: var(--text-strong);
     font-weight: var(--font-weight-medium);
-    margin-top: 2rem;
-    margin-bottom: 0.75rem;
+    margin-top: 0px;
+    margin-bottom: 24px;
     line-height: var(--line-height-large);
   }
 
@@ -40,7 +40,7 @@
 
   /* Paragraphs */
   p {
-    margin-bottom: 1rem;
+    margin-bottom: 12px;
   }
 
   /* Links */
@@ -58,9 +58,10 @@
   /* Lists */
   ul,
   ol {
-    margin-top: 0.5rem;
-    margin-bottom: 1rem;
-    padding-left: 1.5rem;
+    margin-top: 8px;
+    margin-bottom: 12px;
+    margin-inline-start: 0; /* neocode_change */
+    padding-inline-start: 32px; /* neocode_change */
     list-style-position: outside;
   }
 
@@ -70,10 +71,11 @@
 
   ol {
     list-style-type: decimal;
+    padding-inline-start: 2.25rem; /* neocode_change */
   }
 
   li {
-    margin-bottom: 0.5rem;
+    margin-bottom: 8px;
   }
 
   li > p:first-child {
@@ -95,14 +97,18 @@
   li > ol {
     margin-top: 0.25rem;
     margin-bottom: 0.25rem;
-    padding-left: 1rem; /* Minimal indent for nesting only */
+    padding-inline-start: 1rem; /* Minimal indent for nesting only */  /* neocode_change */
+  }
+
+  li > ol {
+    padding-inline-start: 1.75rem; /* neocode_change */
   }
 
   /* Blockquotes */
   blockquote {
-    border-left: 2px solid var(--border-weak-base);
+    border-inline-start: 2px solid var(--border-weak-base); /* neocode_change */
     margin: 1.5rem 0;
-    padding-left: 0.5rem;
+    padding-inline-start: 0.5rem; /* neocode_change */
     color: var(--text-weak);
     font-style: normal;
   }
@@ -111,12 +117,12 @@
   hr {
     border: none;
     height: 0;
-    margin: 2.5rem 0;
+    margin: 40px 0;
   }
 
   .shiki {
     font-size: 13px;
-    padding: 8px 12px;
+    padding: 12px;
     border-radius: 6px;
     border: 0.5px solid var(--border-weak-base);
   }
@@ -195,8 +201,8 @@
   }
 
   pre {
-    margin-top: 2rem;
-    margin-bottom: 2rem;
+    margin-top: 12px;
+    margin-bottom: 32px;
     overflow: auto;
 
     scrollbar-width: none;
@@ -217,13 +223,28 @@
     /* border-radius: 2px; */
     /* background: var(--surface-base); */
     /* box-shadow: 0 0 0 0.5px var(--border-weak-base); */
+
+    /* neocode_change start */
+    &.file-link {
+      cursor: pointer;
+      text-decoration-line: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 2px;
+      transition: color 0.15s ease;
+
+      &:hover {
+        color: var(--text-interactive-base);
+        text-decoration-style: solid;
+      }
+    }
+    /* neocode_change end */
   }
 
   /* Tables */
   table {
     width: 100%;
     border-collapse: collapse;
-    margin: 1.5rem 0;
+    margin: 24px 0;
     font-size: var(--font-size-base);
     display: block;
     overflow-x: auto;
@@ -233,8 +254,8 @@
   td {
     /* Minimal borders for structure, matching TUI "lines" roughly but keeping it web-clean */
     border-bottom: 1px solid var(--border-weaker-base);
-    padding: 0.75rem 0.5rem;
-    text-align: left;
+    padding: 12px;
+    text-align: start; /* neocode_change */
     vertical-align: top;
   }
 

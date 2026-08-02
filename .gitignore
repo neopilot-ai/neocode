@@ -1,28 +1,72 @@
+.husky/_
 .DS_Store
+.secrets/
 node_modules
 .worktrees
 .sst
 .env
-.idea
-.vscode
+.env.local
+.idea/*
+!.idea/gradle.xml
+!.idea/.run
+.idea/*.iml
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/tasks.json
+# use vscode workspaces with peacock to have many vscodes with the same repo:
+*.code-workspace
+.codex
 *~
 playground
 tmp
 dist
 ts-dist
+storybook-static
 .turbo
 **/.serena
 .serena/
+**/.omo
+.omo/
 /result
 refs
 Session.vim
+/opencode.json
 a.out
 target
 .scripts
 .direnv/
+packages/neo-jetbrains/build-tasks/.gradle/
 
 # Local dev files
-neocode-dev
+opencode-dev
+.neo-dev/
+UPCOMING_CHANGELOG.md
 logs/
 *.bun-build
+
+# Telemetry ID
+telemetry-id
 tsconfig.tsbuildinfo
+
+# Neo
+.neo/.gitignore
+.neo/package.json
+.neo/package-lock.json
+.neo/pnpm-lock.yaml
+.neo/bun.lock
+.neo/yarn.lock
+.neo/node_modules
+.neo/plans/*upstream-merge-report-*.md
+.neocode/.gitignore
+.neocode/package.json
+.neocode/package-lock.json
+.neocode/pnpm-lock.yaml
+.neocode/bun.lock
+.neocode/yarn.lock
+.neocode/node_modules
+
+# Test Artifacts
+packages/app/.artifacts/
+packages/opencode/.artifacts/

@@ -32,8 +32,12 @@ export function ResizeHandle(props: ResizeHandleProps) {
     const startSize = local.size
     let current = startSize
 
+    // neocode_change start - set resize cursor on body during drag
+    const cursor = local.direction === "horizontal" ? "col-resize" : "row-resize"
+    // neocode_change end
     document.body.style.userSelect = "none"
     document.body.style.overflow = "hidden"
+    document.body.style.cursor = cursor // neocode_change
 
     const onMouseMove = (moveEvent: MouseEvent) => {
       const pos = local.direction === "horizontal" ? moveEvent.clientX : moveEvent.clientY
@@ -53,6 +57,7 @@ export function ResizeHandle(props: ResizeHandleProps) {
     const onMouseUp = () => {
       document.body.style.userSelect = ""
       document.body.style.overflow = ""
+      document.body.style.cursor = "" // neocode_change
       document.removeEventListener("mousemove", onMouseMove)
       document.removeEventListener("mouseup", onMouseUp)
 
@@ -73,7 +78,7 @@ export function ResizeHandle(props: ResizeHandleProps) {
       data-direction={local.direction}
       data-edge={local.edge ?? (local.direction === "vertical" ? "start" : "end")}
       classList={{
-        ...(local.classList ?? {}),
+        ...local.classList,
         [local.class ?? ""]: !!local.class,
       }}
       onMouseDown={handleMouseDown}

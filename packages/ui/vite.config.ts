@@ -36,16 +36,18 @@ function providerIconsPlugin() {
   return {
     name: "provider-icons-plugin",
     configureServer() {
-      fetchProviderIcons()
+      if (!process.env.NEO_FETCH_PROVIDER_ICONS) return // neocode_change
+      void fetchProviderIcons()
     },
     buildStart() {
-      fetchProviderIcons()
+      if (!process.env.NEO_FETCH_PROVIDER_ICONS) return // neocode_change
+      void fetchProviderIcons()
     },
   }
 }
 
 async function fetchProviderIcons() {
-  const url = process.env.NEOCODE_MODELS_URL || "https://neomodels.vercel.app"
+  const url = process.env.NEO_MODELS_URL || "https://models.dev"
   const providers = await fetch(`${url}/api.json`)
     .then((res) => res.json())
     .then((json) => Object.keys(json))

@@ -1,0 +1,47 @@
+export const dict = {
+  "neocode:autocomplete.statusBar.enabled": "$(neo-logo) Automatisch aanvullen",
+  "neocode:autocomplete.statusBar.snoozed": "gesluimerd",
+  "neocode:autocomplete.statusBar.warning": "$(warning) Automatisch aanvullen",
+  "neocode:autocomplete.statusBar.tooltip.basic": "Neo Code automatisch aanvullen",
+  "neocode:autocomplete.statusBar.tooltip.disabled": "Neo Code automatisch aanvullen (uitgeschakeld)",
+  "neocode:autocomplete.statusBar.tooltip.noUsableProvider":
+    "**Geen model voor automatisch aanvullen geconfigureerd**\n\nVoeg een profiel toe met een van deze ondersteunde providers om automatisch aanvullen in te schakelen: {{providers}}.\n\n[Instellingen openen]({{command}})",
+  "neocode:autocomplete.statusBar.tooltip.sessionTotal": "Totale sessiekosten:",
+  "neocode:autocomplete.statusBar.tooltip.provider": "Aanbieder:",
+  "neocode:autocomplete.statusBar.tooltip.model": "Model:",
+  "neocode:autocomplete.statusBar.tooltip.profile": "Profiel: ",
+  "neocode:autocomplete.statusBar.tooltip.defaultProfile": "Standaard",
+  "neocode:autocomplete.statusBar.tooltip.completionSummary":
+    "{{count}} aanvullingen uitgevoerd tussen {{startTime}} en {{endTime}}, voor totale kosten van {{cost}}.",
+  "neocode:autocomplete.statusBar.tooltip.providerInfo":
+    "Automatische aanvullingen geleverd door {{model}} via {{provider}}.",
+  "neocode:autocomplete.statusBar.cost.zero": "$0.00",
+  "neocode:autocomplete.statusBar.cost.lessThanCent": "<$0.01",
+  "neocode:autocomplete.toggleMessage": "Neo Code automatisch aanvullen {{status}}",
+  "neocode:autocomplete.progress.title": "Neo Code",
+  "neocode:autocomplete.progress.analyzing": "Je code wordt geanalyseerd...",
+  "neocode:autocomplete.progress.generating": "Voorgestelde bewerkingen worden gegenereerd...",
+  "neocode:autocomplete.progress.processing": "Voorgestelde bewerkingen worden verwerkt...",
+  "neocode:autocomplete.progress.showing": "Voorgestelde bewerkingen worden weergegeven...",
+  "neocode:autocomplete.input.title": "Neo Code: Snelle taak",
+  "neocode:autocomplete.input.placeholder": "bijv. 'refactor deze functie zodat deze efficiënter is'",
+  "neocode:autocomplete.commands.generateSuggestions": "Neo Code: Voorgestelde bewerkingen genereren",
+  "neocode:autocomplete.commands.displaySuggestions": "Voorgestelde bewerkingen weergeven",
+  "neocode:autocomplete.commands.cancelSuggestions": "Voorgestelde bewerkingen annuleren",
+  "neocode:autocomplete.commands.applyCurrentSuggestion": "Huidige voorgestelde bewerking toepassen",
+  "neocode:autocomplete.commands.applyAllSuggestions": "Alle voorgestelde bewerkingen toepassen",
+  "neocode:autocomplete.commands.category": "Neo Code",
+  "neocode:autocomplete.codeAction.title": "Neo Code: Voorgestelde bewerkingen",
+  "neocode:autocomplete.chatParticipant.fullName": "Neo Code-agent",
+  "neocode:autocomplete.chatParticipant.name": "Assistent",
+  "neocode:autocomplete.chatParticipant.description": "Ik kan helpen met snelle taken en voorgestelde bewerkingen.",
+  "neocode:autocomplete.incompatibilityExtensionPopup.message":
+    "Neo Code automatisch aanvullen wordt geblokkeerd door een conflict met GitHub Copilot. Schakel de inline suggesties van Copilot uit om dit op te lossen.",
+  "neocode:autocomplete.incompatibilityExtensionPopup.disableCopilot": "Copilot uitschakelen",
+  "neocode:autocomplete.incompatibilityExtensionPopup.disableInlineAssist": "Automatisch aanvullen uitschakelen",
+  "neocode:autocomplete.creditsExhausted.message":
+    "Neo Code Autocomplete is gepauzeerd. Mogelijke oorzaken: je Neo-account heeft geen credits meer, of je geconfigureerde API-sleutel (BYOK) heeft de quotumlimiet bereikt. Voeg Neo-credits toe of controleer je API-sleutelconfiguratie om autocomplete te hervatten.",
+  "neocode:autocomplete.creditsExhausted.addCredits": "Credits toevoegen",
+  "neocode:autocomplete.authError.message":
+    "Neo Code Autocomplete is gepauzeerd vanwege een authenticatieprobleem. Mogelijke oorzaken: je bent niet aangemeld bij Neo, of je API-sleutel (BYOK) is ongeldig of ontbreekt. Meld je opnieuw aan of controleer de API-sleutelinstellingen van je provider.",
+}

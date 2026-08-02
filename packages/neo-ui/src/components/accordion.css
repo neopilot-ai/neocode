@@ -1,0 +1,9 @@
+/* Neo Accordion overrides */
+
+[data-component="accordion"] {
+  font-size: var(--neo-font-size-13);
+
+  [data-slot="accordion-trigger"] {
+    cursor: pointer;
+  }
+}

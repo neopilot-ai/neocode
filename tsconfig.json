@@ -1,9 +1,5 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": "./tooling/tsconfig/bun.json",
-  "compilerOptions": {
-    "paths": {
-      "@neocode-ai/*": ["./*"]
-    }
-  }
+  "extends": "@tsconfig/bun/tsconfig.json",
+  "compilerOptions": {}
 }

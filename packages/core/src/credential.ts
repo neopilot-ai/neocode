@@ -1,0 +1,423 @@
+export * as Credential from "./credential"
+
+import { asc, eq } from "drizzle-orm"
+// neocode_change start
+import { Context, Effect, Layer, Option, Schema, Semaphore } from "effect"
+// neocode_change end
+import { Database } from "./database/database"
+import { IntegrationSchema } from "./integration/schema"
+import { NonNegativeInt, withStatics } from "./schema"
+import { Identifier } from "./util/identifier"
+import { CredentialTable } from "./credential/sql"
+// neocode_change start
+import { FSUtil } from "./fs-util"
+import { Global } from "./global"
+import { DataMigrationTable } from "./data-migration.sql"
+import path from "path"
+import { parse as parseNeoAccounts } from "./neocode/credential-migration"
+// neocode_change end
+
+export const ID = Schema.String.pipe(
+  Schema.brand("Credential.ID"),
+  withStatics((schema) => ({ create: () => schema.make("cred_" + Identifier.ascending()) })),
+)
+export type ID = typeof ID.Type
+
+export class OAuth extends Schema.Class<OAuth>("Credential.OAuth")({
+  type: Schema.Literal("oauth"),
+  methodID: IntegrationSchema.MethodID,
+  refresh: Schema.String,
+  access: Schema.String,
+  expires: NonNegativeInt,
+  metadata: Schema.optional(Schema.Record(Schema.String, Schema.String)),
+}) {}
+
+export class Key extends Schema.Class<Key>("Credential.Key")({
+  type: Schema.Literal("key"),
+  key: Schema.String,
+  metadata: Schema.optional(Schema.Record(Schema.String, Schema.String)),
+}) {}
+
+export const Info = Schema.Union([OAuth, Key])
+  .pipe(Schema.toTaggedUnion("type"))
+  .annotate({ identifier: "Credential.Info" })
+export type Info = Schema.Schema.Type<typeof Info>
+
+export class Stored extends Schema.Class<Stored>("Credential.Stored")({
+  id: ID,
+  integrationID: IntegrationSchema.ID,
+  label: Schema.String,
+  value: Info,
+}) {}
+
+// neocode_change start - legacy JSON credential stores that predate the integration credential table
+const LegacyOAuth = Schema.Struct({
+  type: Schema.Literal("oauth"),
+  refresh: Schema.String,
+  access: Schema.String,
+  expires: NonNegativeInt,
+  accountId: Schema.optional(Schema.String),
+  enterpriseUrl: Schema.optional(Schema.String),
+})
+
+const LegacyKey = Schema.Struct({
+  type: Schema.Literal("api"),
+  key: Schema.String,
+  metadata: Schema.optional(Schema.Record(Schema.String, Schema.String)),
+})
+
+// recognize config-bootstrap credentials without projecting them into model credentials
+const LegacyWellKnown = Schema.Struct({
+  type: Schema.Literal("wellknown"),
+  key: Schema.String,
+  token: Schema.String,
+})
+
+const LegacyValue = Schema.Union([LegacyOAuth, LegacyKey])
+const LegacyAuth = Schema.Union([LegacyOAuth, LegacyKey, LegacyWellKnown])
+
+const legacyMethod = (integration: IntegrationSchema.ID, type: "oauth" | "api") =>
+  IntegrationSchema.MethodID.make(
+    type === "api" ? "api-key" : integration === IntegrationSchema.ID.make("openai") ? "chatgpt-browser" : "oauth",
+  )
+
+const legacyValue = (integration: IntegrationSchema.ID, credential: Schema.Schema.Type<typeof LegacyValue>): Info =>
+  credential.type === "api"
+    ? new Key({ type: "key", key: credential.key, metadata: credential.metadata })
+    : new OAuth({
+        type: "oauth",
+        methodID: legacyMethod(integration, credential.type),
+        refresh: credential.refresh,
+        access: credential.access,
+        expires: credential.expires,
+        metadata: {
+          ...(credential.accountId ? { accountID: credential.accountId } : {}),
+          ...(credential.enterpriseUrl ? { enterpriseURL: credential.enterpriseUrl } : {}),
+        },
+      })
+// neocode_change end
+
+export interface Interface {
+  /** Returns every stored credential. */
+  readonly all: () => Effect.Effect<Stored[]>
+  /** Returns stored credentials belonging to one integration. */
+  readonly list: (integrationID: IntegrationSchema.ID) => Effect.Effect<Stored[]>
+  /** Replaces any credential for an integration and returns the new record. */
+  readonly create: (input: {
+    readonly integrationID: IntegrationSchema.ID
+    readonly value: Info
+    readonly label?: string
+  }) => Effect.Effect<Stored>
+  /** Updates the label or secret value of a stored credential. */
+  readonly update: (id: ID, updates: Partial<Pick<Stored, "label" | "value">>) => Effect.Effect<void>
+  /** Removes a stored credential. */
+  readonly remove: (id: ID) => Effect.Effect<void>
+}
+
+export class Service extends Context.Service<Service, Interface>()("@opencode/v2/Credential") {}
+
+// neocode_change start - preserve Neo's account JSON stores and reconcile auth.json on every startup
+export const legacyImportLayer = Layer.effectDiscard(
+  Effect.gen(function* () {
+    const { db } = yield* Database.Service
+    const fs = yield* FSUtil.Service
+    const global = yield* Global.Service
+    // the v2 name re-runs the import because upstream migration 20260611192811 drops the credential table
+    const neoName = "credential.neo-account-json-v2"
+    if (!(yield* db.select().from(DataMigrationTable).where(eq(DataMigrationTable.name, neoName)).get())) {
+      const current = yield* fs.readJson(path.join(global.data, "account.json")).pipe(Effect.option)
+      const prior = yield* fs.readJson(path.join(global.data, "auth-v2.json")).pipe(Effect.option)
+      const raw = Option.isSome(current) ? current.value : Option.getOrUndefined(prior)
+      // one credential per integration: only the active account of each service is imported
+      const values = parseNeoAccounts(raw).filter((item) => item.active)
+      if (values.length > 0) {
+        yield* db.transaction((tx) =>
+          Effect.gen(function* () {
+            const existing = new Set(
+              (yield* tx.select({ integrationID: CredentialTable.integration_id }).from(CredentialTable).all()).map(
+                (item) => item.integrationID,
+              ),
+            )
+            for (const item of values) {
+              const integration = IntegrationSchema.ID.make(item.connectorID.replace(/\/+$/, ""))
+              if (existing.has(integration)) continue
+              yield* tx.insert(CredentialTable).values({
+                id: ID.create(),
+                integration_id: integration,
+                label: item.label,
+                value: legacyValue(integration, item.credential),
+              })
+            }
+            yield* tx.insert(DataMigrationTable).values({ name: neoName, time_completed: Date.now() }).run()
+          }),
+        )
+      }
+    }
+    const name = "credential.auth-json"
+    const raw = yield* fs.readJson(path.join(global.data, "auth.json")).pipe(Effect.option)
+    if (Option.isNone(raw) || typeof raw.value !== "object" || raw.value === null || Array.isArray(raw.value)) return
+    const decode = Schema.decodeUnknownOption(LegacyValue)
+    const values = Object.entries(raw.value).flatMap(([integrationID, value]) => {
+      const decoded = decode(value)
+      if (Option.isNone(decoded)) return []
+      const integration = IntegrationSchema.ID.make(integrationID.replace(/\/+$/, ""))
+      return [{ integration, value: legacyValue(integration, decoded.value) }]
+    })
+    yield* db.transaction((tx) =>
+      Effect.gen(function* () {
+        for (const item of values) {
+          // reconcile on every startup so a released client can update auth.json after import.
+          const current = yield* tx
+            .select()
+            .from(CredentialTable)
+            .where(eq(CredentialTable.integration_id, item.integration))
+            .get()
+          if (current) {
+            yield* tx.update(CredentialTable).set({ value: item.value }).where(eq(CredentialTable.id, current.id)).run()
+            continue
+          }
+          yield* tx.insert(CredentialTable).values({
+            id: ID.create(),
+            integration_id: item.integration,
+            label: "Imported",
+            value: item.value,
+          })
+        }
+        yield* tx.insert(DataMigrationTable).values({ name, time_completed: Date.now() }).onConflictDoNothing().run()
+      }),
+    )
+  }).pipe(Effect.orDie),
+)
+// neocode_change end
+
+export const layer = Layer.effect(
+  Service,
+  Effect.gen(function* () {
+    const { db } = yield* Database.Service
+    // neocode_change start
+    const fs = Option.getOrUndefined(yield* Effect.serviceOption(FSUtil.Service))
+    const global = Option.getOrUndefined(yield* Effect.serviceOption(Global.Service))
+    // neocode_change end
+    const decode = Schema.decodeUnknownSync(Info)
+    const stored = (row: typeof CredentialTable.$inferSelect) => {
+      if (!row.integration_id) return
+      return new Stored({
+        id: row.id,
+        integrationID: row.integration_id,
+        label: row.label,
+        value: decode(row.value),
+      })
+    }
+
+    // neocode_change start - process-local workspace credentials override host storage without being persisted
+    const content = process.env.NEO_AUTH_CONTENT
+    const injected = yield* content === undefined
+      ? Effect.succeed(new Map<IntegrationSchema.ID, Stored>())
+      : Effect.try({
+          try: () => JSON.parse(content) as unknown,
+          catch: (cause) => cause,
+        }).pipe(
+          Effect.flatMap((raw) => {
+            if (typeof raw !== "object" || raw === null || Array.isArray(raw)) {
+              return Effect.succeed(new Map<IntegrationSchema.ID, Stored>())
+            }
+            const decode = Schema.decodeUnknownOption(LegacyAuth)
+            return Effect.succeed(
+              new Map(
+                Object.entries(raw).flatMap(([name, raw]) => {
+                  const decoded = decode(raw)
+                  if (Option.isNone(decoded) || decoded.value.type === "wellknown") return []
+                  const integration = IntegrationSchema.ID.make(name.replace(/\/+$/, ""))
+                  return [
+                    [
+                      integration,
+                      new Stored({
+                        id: ID.make(`cred_env_${Buffer.from(integration).toString("base64url")}`),
+                        integrationID: integration,
+                        label: "Environment",
+                        value: legacyValue(integration, decoded.value),
+                      }),
+                    ] as const,
+                  ]
+                }),
+              ),
+            )
+          }),
+          Effect.catch((cause) =>
+            Effect.logWarning("invalid NEO_AUTH_CONTENT; using no process-local credentials", { cause }).pipe(
+              Effect.as(new Map<IntegrationSchema.ID, Stored>()),
+            ),
+          ),
+        )
+    const isolated = content !== undefined
+    const local = new Map(injected)
+    const find = (id: ID) => [...local.values()].find((credential) => credential.id === id)
+
+    const lock = Semaphore.makeUnsafe(1)
+    const writeLegacy = (integration: IntegrationSchema.ID) =>
+      lock.withPermit(
+        Effect.gen(function* () {
+          if (!fs || !global || isolated) return
+          const file = path.join(global.data, "auth.json")
+          const raw = yield* fs.readJson(file).pipe(
+            Effect.catchReason("PlatformError", "NotFound", () => Effect.succeed({})),
+            Effect.catch((cause) =>
+              Effect.logWarning("failed to read legacy auth.json; preserving existing file", { cause }).pipe(
+                Effect.as(undefined),
+              ),
+            ),
+          )
+          if (raw === undefined) return
+          const data: Record<string, unknown> =
+            typeof raw === "object" && raw !== null && !Array.isArray(raw)
+              ? { ...(raw as Record<string, unknown>) }
+              : {}
+          const row = yield* db
+            .select()
+            .from(CredentialTable)
+            .where(eq(CredentialTable.integration_id, integration))
+            .get()
+            .pipe(Effect.orDie)
+          delete data[integration + "/"]
+          if (!row) delete data[integration]
+          else {
+            const value = decode(row.value)
+            data[integration] =
+              value.type === "key"
+                ? { type: "api", key: value.key, metadata: value.metadata }
+                : {
+                    type: "oauth",
+                    refresh: value.refresh,
+                    access: value.access,
+                    expires: value.expires,
+                    accountId: value.metadata?.accountID,
+                    enterpriseUrl: value.metadata?.enterpriseURL,
+                  }
+          }
+          yield* fs.writeJson(file, data, 0o600).pipe(Effect.orDie)
+        }),
+      )
+    // neocode_change end
+
+    return Service.of({
+      all: Effect.fn("Credential.all")(function* () {
+        if (isolated) return [...local.values()] // neocode_change
+        return (yield* db
+          .select()
+          .from(CredentialTable)
+          .orderBy(asc(CredentialTable.time_created))
+          .all()
+          .pipe(Effect.orDie)).flatMap((row) => {
+          const credential = stored(row)
+          return credential ? [credential] : []
+        })
+      }),
+      list: Effect.fn("Credential.list")(function* (integrationID) {
+        // neocode_change start
+        if (isolated) {
+          const credential = local.get(integrationID)
+          return credential ? [credential] : []
+        }
+        // neocode_change end
+        return (yield* db
+          .select()
+          .from(CredentialTable)
+          .where(eq(CredentialTable.integration_id, integrationID))
+          .orderBy(asc(CredentialTable.time_created))
+          .all()
+          .pipe(Effect.orDie)).flatMap((row) => {
+          const credential = stored(row)
+          return credential ? [credential] : []
+        })
+      }),
+      create: Effect.fn("Credential.create")(function* (input) {
+        const credential = new Stored({
+          id: ID.create(),
+          integrationID: input.integrationID,
+          label: input.label ?? "default",
+          value: input.value,
+        })
+        // neocode_change start - credential changes in isolated workspaces are process-local
+        if (isolated) {
+          local.set(credential.integrationID, credential)
+          return credential
+        }
+        // neocode_change end
+        yield* db
+          .transaction((tx) =>
+            Effect.gen(function* () {
+              yield* tx
+                .delete(CredentialTable)
+                .where(eq(CredentialTable.integration_id, credential.integrationID))
+                .run()
+              yield* tx
+                .insert(CredentialTable)
+                .values({
+                  id: credential.id,
+                  integration_id: credential.integrationID,
+                  label: credential.label,
+                  value: credential.value,
+                })
+                .run()
+            }),
+          )
+          .pipe(Effect.orDie)
+        yield* writeLegacy(credential.integrationID) // neocode_change
+        return credential
+      }),
+      update: Effect.fn("Credential.update")(function* (id, updates) {
+        if (!updates.label && !updates.value) return
+        // neocode_change start - isolated updates never reach the host database
+        if (isolated) {
+          const credential = find(id)
+          if (!credential) return
+          local.set(
+            credential.integrationID,
+            new Stored({
+              ...credential,
+              label: updates.label ?? credential.label,
+              value: updates.value ?? credential.value,
+            }),
+          )
+          return
+        }
+        const row = yield* db.select().from(CredentialTable).where(eq(CredentialTable.id, id)).get().pipe(Effect.orDie)
+        // neocode_change end
+        yield* db
+          .update(CredentialTable)
+          .set({ label: updates.label, value: updates.value })
+          .where(eq(CredentialTable.id, id))
+          .run()
+          .pipe(Effect.orDie)
+        if (row?.integration_id) yield* writeLegacy(row.integration_id) // neocode_change
+      }),
+      remove: Effect.fn("Credential.remove")(function* (id) {
+        // neocode_change start - isolated removals remain process-local
+        if (isolated) {
+          const credential = find(id)
+          if (credential) local.delete(credential.integrationID)
+          return
+        }
+        const row = yield* db.select().from(CredentialTable).where(eq(CredentialTable.id, id)).get().pipe(Effect.orDie)
+        // neocode_change end
+        yield* db.delete(CredentialTable).where(eq(CredentialTable.id, id)).run().pipe(Effect.orDie)
+        if (row?.integration_id) yield* writeLegacy(row.integration_id) // neocode_change
+      }),
+    })
+  }),
+)
+
+export const defaultLayer = layer.pipe(
+  Layer.provide(Database.defaultLayer),
+  // neocode_change start
+  Layer.provide(FSUtil.defaultLayer),
+  Layer.provide(Global.defaultLayer),
+  Layer.provideMerge(
+    legacyImportLayer.pipe(
+      Layer.provide(Database.defaultLayer),
+      Layer.provide(FSUtil.defaultLayer),
+      Layer.provide(Global.defaultLayer),
+    ),
+  ),
+  // neocode_change end
+)

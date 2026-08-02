@@ -1,0 +1,15 @@
+{
+  "[mdx]": {
+    "editor.formatOnSave": false,
+    "editor.defaultFormatter": null
+  },
+  "files.exclude": {
+    "packages/neo-vscode/out": false,
+    "packages/neo-vscode/dist": false
+  },
+  "search.exclude": {
+    "packages/neo-vscode/out": true,
+    "packages/neo-vscode/dist": true
+  },
+  "typescript.tsc.autoDetect": "off"
+}

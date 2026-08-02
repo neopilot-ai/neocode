@@ -1,1 +1,0 @@
-../../../packages/ui/src/custom-elements.d.ts

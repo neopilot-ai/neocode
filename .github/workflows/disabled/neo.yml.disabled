@@ -1,0 +1,38 @@
+name: neo
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+jobs:
+  neo:
+    if: |
+      (github.event.comment.author_association == 'MEMBER' || github.event.comment.author_association == 'OWNER') &&
+      (
+        contains(github.event.comment.body, ' /kc') ||
+        startsWith(github.event.comment.body, '/kc') ||
+        contains(github.event.comment.body, ' /neo') ||
+        startsWith(github.event.comment.body, '/neo')
+      )
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: read
+      issues: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-bun
+
+      - name: Run opencode
+        uses: Neopilot-Ai/neocode/github@latest
+        env:
+          NEO_API_KEY: ${{ secrets.NEO_API_KEY }}
+          NEO_ORG_ID: ${{ secrets.NEO_ORG_ID }}
+          NEO_PERMISSION: '{"bash": "deny"}'
+        with:
+          model: neo/neo-auto/frontier

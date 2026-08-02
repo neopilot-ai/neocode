@@ -6,18 +6,26 @@ permissions:
 on:
   workflow_dispatch:
   push:
-    branches: [dev]
+    branches: [main]
     paths:
       - "bun.lock"
       - "package.json"
       - "packages/*/package.json"
       - "flake.lock"
+      - "nix/node_modules.nix"
+      - "nix/scripts/**"
+      - "patches/**"
       - ".github/workflows/nix-hashes.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   # Native runners required: bun install cross-compilation flags (--os/--cpu)
   # do not produce byte-identical node_modules as native installs.
   compute-hash:
+    if: github.repository == 'Neopilot-Ai/neocode'
     strategy:
       fail-fast: false
       matrix:
@@ -25,7 +33,7 @@ jobs:
           - system: x86_64-linux
             runner: ubuntu-latest
           - system: aarch64-linux
-            runner: ubuntu-latest-arm
+            runner: blacksmith-4vcpu-ubuntu-2404-arm
           - system: x86_64-darwin
             runner: macos-15-intel
           - system: aarch64-darwin
@@ -34,10 +42,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Setup Nix
-        uses: nixbuild/nix-quick-install-action@v34
+        uses: nixbuild/nix-quick-install-action@2c9db80fb984ceb1bcaa77cdda3fdf8cfba92035 # v34
 
       - name: Compute node_modules hash
         id: hash
@@ -49,14 +57,24 @@ jobs:
           BUILD_LOG=$(mktemp)
           trap 'rm -f "$BUILD_LOG"' EXIT
 
-          # Build with fakeHash to trigger hash mismatch and reveal correct hash
-          nix build ".#packages.${SYSTEM}.node_modules_updater" --no-link 2>&1 | tee "$BUILD_LOG" || true
+          HASH=""
+          MAX_ATTEMPTS=3
+          for ((ATTEMPT = 1; ATTEMPT <= MAX_ATTEMPTS; ATTEMPT++)); do
+            # Build with fakeHash to trigger hash mismatch and reveal correct hash
+            nix build ".#packages.${SYSTEM}.node_modules_updater" --no-link 2>&1 | tee "$BUILD_LOG" || true
 
-          # Extract hash from build log with portability
-          HASH="$(grep -oE 'sha256-[A-Za-z0-9+/=]+' "$BUILD_LOG" | tail -n1 || true)"
+            HASH="$(nix run --inputs-from . nixpkgs#gnugrep -- -oP 'got:\s*\Ksha256-[A-Za-z0-9+/=]+' "$BUILD_LOG" | tail -n1 || true)"
+
+            [ -n "$HASH" ] && break
+
+            if [ "$ATTEMPT" -lt "$MAX_ATTEMPTS" ]; then
+              echo "::warning::Attempt ${ATTEMPT}/${MAX_ATTEMPTS} produced no hash for ${SYSTEM}; retrying in $((ATTEMPT * 10))s"
+              sleep $((ATTEMPT * 10))
+            fi
+          done
 
           if [ -z "$HASH" ]; then
-            echo "::error::Failed to compute hash for ${SYSTEM}"
+            echo "::error::Failed to compute hash for ${SYSTEM} after ${MAX_ATTEMPTS} attempts"
             cat "$BUILD_LOG"
             exit 1
           fi
@@ -65,7 +83,7 @@ jobs:
           echo "Computed hash for ${SYSTEM}: $HASH"
 
       - name: Upload hash
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7 # neocode_change
         with:
           name: hash-${{ matrix.system }}
           path: hash.txt
@@ -73,29 +91,32 @@ jobs:
 
   update-hashes:
     needs: compute-hash
-    if: github.event_name != 'pull_request'
+    if: github.repository == 'Neopilot-Ai/neocode' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6 # neocode_change
         with:
           persist-credentials: false
           fetch-depth: 0
           ref: ${{ github.ref_name }}
 
-      - name: Setup git committer
+      - name: Setup Git Committer
+        id: committer
         uses: ./.github/actions/setup-git-committer
         with:
-          neocode-app-id: ${{ secrets.NEOCODE_APP_ID || vars.NEOCODE_APP_ID }}
-          neocode-app-secret: ${{ secrets.NEOCODE_APP_SECRET }}
+          # neocode_change start
+          neo-maintainer-app-id: ${{ secrets.NEO_MAINTAINER_APP_ID }}
+          neo-maintainer-app-secret: ${{ secrets.NEO_MAINTAINER_APP_SECRET }}
+          # neocode_change end
 
       - name: Pull latest changes
         run: |
           git pull --rebase --autostash origin "$GITHUB_REF_NAME"
 
       - name: Download hash artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8 # neocode_change
         with:
           path: hashes
           pattern: hash-*

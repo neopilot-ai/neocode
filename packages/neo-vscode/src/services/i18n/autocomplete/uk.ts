@@ -1,0 +1,47 @@
+export const dict = {
+  "neocode:autocomplete.statusBar.enabled": "$(neo-logo) Автодоповнення",
+  "neocode:autocomplete.statusBar.snoozed": "відкладено",
+  "neocode:autocomplete.statusBar.warning": "$(warning) Автодоповнення",
+  "neocode:autocomplete.statusBar.tooltip.basic": "Автодоповнення Neo Code",
+  "neocode:autocomplete.statusBar.tooltip.disabled": "Автодоповнення Neo Code (вимкнено)",
+  "neocode:autocomplete.statusBar.tooltip.noUsableProvider":
+    "**Модель автодоповнення не налаштована**\n\nЩоб увімкнути автодоповнення, додайте профіль з одним із цих підтримуваних постачальників: {{providers}}.\n\n[Відкрити налаштування]({{command}})",
+  "neocode:autocomplete.statusBar.tooltip.sessionTotal": "Загальна вартість сеансу:",
+  "neocode:autocomplete.statusBar.tooltip.provider": "Постачальник:",
+  "neocode:autocomplete.statusBar.tooltip.model": "Модель:",
+  "neocode:autocomplete.statusBar.tooltip.profile": "Профіль: ",
+  "neocode:autocomplete.statusBar.tooltip.defaultProfile": "За замовчуванням",
+  "neocode:autocomplete.statusBar.tooltip.completionSummary":
+    "Виконано {{count}} доповнень між {{startTime}} і {{endTime}}, із загальною вартістю {{cost}}.",
+  "neocode:autocomplete.statusBar.tooltip.providerInfo": "Автодоповнення надає {{model}} через {{provider}}.",
+  "neocode:autocomplete.statusBar.cost.zero": "$0.00",
+  "neocode:autocomplete.statusBar.cost.lessThanCent": "<$0.01",
+  "neocode:autocomplete.toggleMessage": "Автодоповнення Neo Code {{status}}",
+  "neocode:autocomplete.progress.title": "Neo Code",
+  "neocode:autocomplete.progress.analyzing": "Аналіз вашого коду...",
+  "neocode:autocomplete.progress.generating": "Створення запропонованих змін...",
+  "neocode:autocomplete.progress.processing": "Обробка запропонованих змін...",
+  "neocode:autocomplete.progress.showing": "Показ запропонованих змін...",
+  "neocode:autocomplete.input.title": "Neo Code: Швидке завдання",
+  "neocode:autocomplete.input.placeholder": "наприклад, 'рефакторинг цієї функції, щоб вона була ефективнішою'",
+  "neocode:autocomplete.commands.generateSuggestions": "Neo Code: Створити запропоновані зміни",
+  "neocode:autocomplete.commands.displaySuggestions": "Показати запропоновані зміни",
+  "neocode:autocomplete.commands.cancelSuggestions": "Скасувати запропоновані зміни",
+  "neocode:autocomplete.commands.applyCurrentSuggestion": "Застосувати поточну запропоновану зміну",
+  "neocode:autocomplete.commands.applyAllSuggestions": "Застосувати всі запропоновані зміни",
+  "neocode:autocomplete.commands.category": "Neo Code",
+  "neocode:autocomplete.codeAction.title": "Neo Code: Запропоновані зміни",
+  "neocode:autocomplete.chatParticipant.fullName": "Агент Neo Code",
+  "neocode:autocomplete.chatParticipant.name": "Агент",
+  "neocode:autocomplete.chatParticipant.description":
+    "Я можу допомогти зі швидкими завданнями та запропонованими змінами.",
+  "neocode:autocomplete.incompatibilityExtensionPopup.message":
+    "Автодоповнення Neo Code блокується через конфлікт із GitHub Copilot. Щоб виправити це, потрібно вимкнути вбудовані пропозиції Copilot.",
+  "neocode:autocomplete.incompatibilityExtensionPopup.disableCopilot": "Вимкнути Copilot",
+  "neocode:autocomplete.incompatibilityExtensionPopup.disableInlineAssist": "Вимкнути автодоповнення",
+  "neocode:autocomplete.creditsExhausted.message":
+    "Автодоповнення Neo Code призупинено. Можливі причини: у вашому обліковому записі Neo не залишилося кредитів або налаштований API-ключ (BYOK) досяг ліміту квоти. Додайте кредити Neo або перевірте конфігурацію API-ключа, щоб відновити автодоповнення.",
+  "neocode:autocomplete.creditsExhausted.addCredits": "Додати кредити",
+  "neocode:autocomplete.authError.message":
+    "Автодоповнення Neo Code призупинено через проблему автентифікації. Можливі причини: ви не ввійшли в Neo або ваш API-ключ (BYOK) недійсний чи відсутній. Увійдіть знову або перевірте налаштування API-ключа постачальника.",
+}

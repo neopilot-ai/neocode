@@ -1,69 +1,45 @@
-# Security Policy
+# Security
 
-## Supported Versions
+## IMPORTANT
 
-| Version | Supported      |
-| ------- | -------------- |
-| 1.x.x   | ✅ Current     |
-| < 1.0   | ❌ Unsupported |
+We do not accept AI generated security reports. We receive a large number of
+these and we absolutely do not have the resources to review them all. If you
+submit one that will be an automatic ban from the project.
 
-## Reporting a Vulnerability
+## Threat Model
 
-The NeoCode team takes security vulnerabilities seriously. We appreciate your efforts to responsibly disclose them.
+### Overview
 
-If you discover a security vulnerability, please **do not open a public issue**. Instead, send an email to: **security@neocode.ai**
+Neo CLI is an AI-powered coding assistant that runs locally on your machine. It provides an agent system with access to powerful tools including shell execution, file operations, and web access.
 
-Please include:
+### No Sandbox
 
-1. **Description of the vulnerability**
-2. **Steps to reproduce** the issue
-3. **Potential impact** of the vulnerability
-4. **Any proof-of-concept code** (if available)
+Neo CLI does **not** sandbox the agent. The permission system exists as a UX feature to help users stay aware of what actions the agent is taking - it prompts for confirmation before executing commands, writing files, etc. However, it is not designed to provide security isolation.
 
-## Response Timeline
+If you need true isolation, run Neo CLI inside a Docker container or VM.
 
-- **Initial response**: Within 48 hours
-- **Detailed assessment**: Within 7 days
-- **Patch release**: Based on severity assessment
-- **Public disclosure**: After patch is available
+### Server Mode
 
-## Security Best Practices
+Server mode is opt-in only. When enabled, set `NEO_SERVER_PASSWORD` to require HTTP Basic Auth. Without this, the server runs unauthenticated (with a warning). It is the end user's responsibility to secure the server - any functionality it provides is not a vulnerability.
 
-### For Users
+### Out of Scope
 
-- Keep NeoCode updated to the latest version
-- Review permission settings carefully
-- Use in trusted environments
-- Monitor access logs regularly
+| Category | Rationale |
+|---|---|
+| **Server access when opted-in** | If you enable server mode, API access is expected behavior |
+| **Sandbox escapes** | The permission system is not a sandbox (see above) |
+| **LLM provider data handling** | Data sent to your configured LLM provider is governed by their policies |
+| **MCP server behavior** | External MCP servers you configure are outside our trust boundary |
+| **Malicious config files** | Users control their own config; modifying it is not an attack vector |
 
-### For Developers
+---
 
-- Validate all user inputs
-- Use principle of least privilege
-- Keep dependencies updated
-- Follow secure coding practices
+# Reporting Security Issues
 
-## Security Features
+We value the contributions of the security research community and recognize the importance of a coordinated approach to vulnerability disclosure. If you have discovered a security vulnerability, we encourage you to let us know immediately. We welcome the opportunity to work with you to resolve the issue promptly.
 
-- **Input validation** with Zod schemas
-- **Permission system** for tool access
-- **Session isolation** between users
-- **Audit logging** for actions
-- **Sandboxed execution** environments
+Please email your findings to [security@neo.khulnasoft.com](mailto:security@neo.khulnasoft.com). We will acknowledge your report and work with you to resolve the issue.
 
-## Security Updates
+After the initial reply to your report, the security team will keep you informed of the progress towards a fix and full announcement, and may ask for additional information or guidance.
 
-Security updates are announced through:
-
-- GitHub Security Advisories
-- Release notes
-- Discord announcements
-- Email notifications (for critical issues)
-
-## Credits
-
-We acknowledge and thank security researchers who help us keep NeoCode secure. All valid security reports will be credited in our release notes.
-
-## License
-
-This security policy is licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0).
+For more details, see our [Security Disclosure](https://neo.khulnasoft.com/security) page.

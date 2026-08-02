@@ -1,6 +1,0 @@
-[test]
-coverage = false
-coverageReporter = ["text", "json"]
-
-[install]
-peerDependency = true

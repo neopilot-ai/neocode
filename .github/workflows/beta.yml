@@ -7,27 +7,31 @@ on:
 
 jobs:
   sync:
+    if: github.repository == 'Neopilot-Ai/neocode'
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6 # neocode_change
         with:
+          persist-credentials: false # neocode_change
           fetch-depth: 0
 
       - name: Setup Bun
         uses: ./.github/actions/setup-bun
 
       - name: Setup Git Committer
-        id: setup-git-committer
+        id: committer
         uses: ./.github/actions/setup-git-committer
         with:
-          neocode-app-id: ${{ secrets.NEOCODE_APP_ID || vars.NEOCODE_APP_ID }}
-          neocode-app-secret: ${{ secrets.NEOCODE_APP_SECRET }}
+          # neocode_change start
+          neo-maintainer-app-id: ${{ secrets.NEO_MAINTAINER_APP_ID }}
+          neo-maintainer-app-secret: ${{ secrets.NEO_MAINTAINER_APP_SECRET }}
+          # neocode_change end
 
       - name: Sync beta branch
         env:
-          GH_TOKEN: ${{ steps.setup-git-committer.outputs.token }}
-        run: bun tooling/scripts/beta.ts
+          GH_TOKEN: ${{ steps.committer.outputs.token }}
+        run: bun script/beta.ts

@@ -7,26 +7,33 @@ on:
 
 jobs:
   generate:
+    if: github.repository == 'Neopilot-Ai/neocode'
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6 # neocode_change
+        # neocode_change start
+        with:
+          persist-credentials: false
+        # neocode_change end
 
       - name: Setup Bun
         uses: ./.github/actions/setup-bun
 
-      - name: Setup git committer
+      - name: Setup Git Committer
         id: committer
         uses: ./.github/actions/setup-git-committer
         with:
-          neocode-app-id: ${{ secrets.NEOCODE_APP_ID || vars.NEOCODE_APP_ID }}
-          neocode-app-secret: ${{ secrets.NEOCODE_APP_SECRET }}
+          # neocode_change start
+          neo-maintainer-app-id: ${{ secrets.NEO_MAINTAINER_APP_ID }}
+          neo-maintainer-app-secret: ${{ secrets.NEO_MAINTAINER_APP_SECRET }}
+          # neocode_change end
 
       - name: Generate
-        run: ./tooling/scripts/generate.ts
+        run: ./script/generate.ts
 
       - name: Commit and push
         run: |
@@ -43,7 +50,7 @@ jobs:
           #   echo "Failed to push generated code."
           #   echo "Please run locally and push:"
           #   echo ""
-          #   echo "  ./tooling/scripts/generate.ts"
+          #   echo "  ./script/generate.ts"
           #   echo "  git add -A && git commit -m \"chore: generate\" && git push"
           #   echo ""
           #   echo "============================================"

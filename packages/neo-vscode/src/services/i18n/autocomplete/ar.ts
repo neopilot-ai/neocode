@@ -1,0 +1,47 @@
+export const dict = {
+  "neocode:autocomplete.statusBar.enabled": "$(neo-logo) الإكمال التلقائي",
+  "neocode:autocomplete.statusBar.snoozed": "مؤجل",
+  "neocode:autocomplete.statusBar.warning": "$(warning) الإكمال التلقائي",
+  "neocode:autocomplete.statusBar.tooltip.basic": "الإكمال التلقائي في Neo Code",
+  "neocode:autocomplete.statusBar.tooltip.disabled": "الإكمال التلقائي في Neo Code (معطل)",
+  "neocode:autocomplete.statusBar.tooltip.noUsableProvider":
+    "**لم يتم تكوين نموذج للإكمال التلقائي**\n\nلتفعيل الإكمال التلقائي، أضف ملفا شخصيا يحتوي على أحد هؤلاء المزودين المدعومين: {{providers}}.\n\n[فتح الإعدادات]({{command}})",
+  "neocode:autocomplete.statusBar.tooltip.sessionTotal": "إجمالي تكلفة الجلسة:",
+  "neocode:autocomplete.statusBar.tooltip.provider": "المزود:",
+  "neocode:autocomplete.statusBar.tooltip.model": "النموذج:",
+  "neocode:autocomplete.statusBar.tooltip.profile": "الملف الشخصي: ",
+  "neocode:autocomplete.statusBar.tooltip.defaultProfile": "افتراضي",
+  "neocode:autocomplete.statusBar.tooltip.completionSummary":
+    "تم تنفيذ {{count}} عمليات إكمال بين {{startTime}} و {{endTime}}، بتكلفة إجمالية قدرها {{cost}}.",
+  "neocode:autocomplete.statusBar.tooltip.providerInfo":
+    "يتم توفير الإكمال التلقائي بواسطة {{model}} عبر {{provider}}.",
+  "neocode:autocomplete.statusBar.cost.zero": "$0.00",
+  "neocode:autocomplete.statusBar.cost.lessThanCent": "<$0.01",
+  "neocode:autocomplete.toggleMessage": "الإكمال التلقائي في Neo Code {{status}}",
+  "neocode:autocomplete.progress.title": "Neo Code",
+  "neocode:autocomplete.progress.analyzing": "جار تحليل الكود...",
+  "neocode:autocomplete.progress.generating": "جار إنشاء التعديلات المقترحة...",
+  "neocode:autocomplete.progress.processing": "جار معالجة التعديلات المقترحة...",
+  "neocode:autocomplete.progress.showing": "جار عرض التعديلات المقترحة...",
+  "neocode:autocomplete.input.title": "Neo Code: مهمة سريعة",
+  "neocode:autocomplete.input.placeholder": "مثال: 'أعد هيكلة هذه الدالة لتكون أكثر كفاءة'",
+  "neocode:autocomplete.commands.generateSuggestions": "Neo Code: إنشاء تعديلات مقترحة",
+  "neocode:autocomplete.commands.displaySuggestions": "عرض التعديلات المقترحة",
+  "neocode:autocomplete.commands.cancelSuggestions": "إلغاء التعديلات المقترحة",
+  "neocode:autocomplete.commands.applyCurrentSuggestion": "تطبيق التعديل المقترح الحالي",
+  "neocode:autocomplete.commands.applyAllSuggestions": "تطبيق كل التعديلات المقترحة",
+  "neocode:autocomplete.commands.category": "Neo Code",
+  "neocode:autocomplete.codeAction.title": "Neo Code: تعديلات مقترحة",
+  "neocode:autocomplete.chatParticipant.fullName": "وكيل Neo Code",
+  "neocode:autocomplete.chatParticipant.name": "الوكيل",
+  "neocode:autocomplete.chatParticipant.description": "يمكنني مساعدتك في المهام السريعة والتعديلات المقترحة.",
+  "neocode:autocomplete.incompatibilityExtensionPopup.message":
+    "يتم حظر الإكمال التلقائي في Neo Code بسبب تعارض مع GitHub Copilot. لإصلاح ذلك، يجب تعطيل اقتراحات Copilot المضمنة.",
+  "neocode:autocomplete.incompatibilityExtensionPopup.disableCopilot": "تعطيل Copilot",
+  "neocode:autocomplete.incompatibilityExtensionPopup.disableInlineAssist": "تعطيل الإكمال التلقائي",
+  "neocode:autocomplete.creditsExhausted.message":
+    "تم إيقاف الإكمال التلقائي في Neo Code مؤقتا. الأسباب المحتملة: لا توجد أرصدة متبقية في حساب Neo الخاص بك، أو أن مفتاح API المكون (BYOK) وصل إلى حد الحصة. أضف أرصدة Neo أو تحقق من إعدادات مفتاح API لاستئناف الإكمال التلقائي.",
+  "neocode:autocomplete.creditsExhausted.addCredits": "إضافة أرصدة",
+  "neocode:autocomplete.authError.message":
+    "تم إيقاف الإكمال التلقائي في Neo Code مؤقتا بسبب مشكلة مصادقة. الأسباب المحتملة: لم تسجل الدخول إلى Neo، أو أن مفتاح API (BYOK) غير صالح أو مفقود. يرجى تسجيل الدخول مرة أخرى أو التحقق من إعدادات مفتاح API للمزود.",
+}

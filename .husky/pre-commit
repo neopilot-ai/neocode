@@ -1,4 +1,0 @@
-echo "Running pre-commit checks..."
-echo "Running type check..."
-bun run typecheck || exit 1
-echo "Pre-commit checks passed!"

@@ -1,0 +1,47 @@
+export const dict = {
+  "neocode:autocomplete.statusBar.enabled": "$(neo-logo) เติมข้อความอัตโนมัติ",
+  "neocode:autocomplete.statusBar.snoozed": "พักไว้",
+  "neocode:autocomplete.statusBar.warning": "$(warning) เติมข้อความอัตโนมัติ",
+  "neocode:autocomplete.statusBar.tooltip.basic": "การเติมข้อความอัตโนมัติของ Neo Code",
+  "neocode:autocomplete.statusBar.tooltip.disabled": "การเติมข้อความอัตโนมัติของ Neo Code (ปิดใช้งาน)",
+  "neocode:autocomplete.statusBar.tooltip.noUsableProvider":
+    "**ยังไม่ได้กำหนดค่าโมเดลเติมข้อความอัตโนมัติ**\n\nหากต้องการเปิดใช้การเติมข้อความอัตโนมัติ ให้เพิ่มโปรไฟล์ที่มีผู้ให้บริการที่รองรับต่อไปนี้: {{providers}}\n\n[เปิดการตั้งค่า]({{command}})",
+  "neocode:autocomplete.statusBar.tooltip.sessionTotal": "ค่าใช้จ่ายรวมของเซสชัน:",
+  "neocode:autocomplete.statusBar.tooltip.provider": "ผู้ให้บริการ:",
+  "neocode:autocomplete.statusBar.tooltip.model": "โมเดล:",
+  "neocode:autocomplete.statusBar.tooltip.profile": "โปรไฟล์: ",
+  "neocode:autocomplete.statusBar.tooltip.defaultProfile": "ค่าเริ่มต้น",
+  "neocode:autocomplete.statusBar.tooltip.completionSummary":
+    "ดำเนินการเติมข้อความ {{count}} ครั้งระหว่าง {{startTime}} ถึง {{endTime}} โดยมีค่าใช้จ่ายรวม {{cost}}",
+  "neocode:autocomplete.statusBar.tooltip.providerInfo":
+    "การเติมข้อความอัตโนมัติให้บริการโดย {{model}} ผ่าน {{provider}}",
+  "neocode:autocomplete.statusBar.cost.zero": "$0.00",
+  "neocode:autocomplete.statusBar.cost.lessThanCent": "<$0.01",
+  "neocode:autocomplete.toggleMessage": "การเติมข้อความอัตโนมัติของ Neo Code {{status}}",
+  "neocode:autocomplete.progress.title": "Neo Code",
+  "neocode:autocomplete.progress.analyzing": "กำลังวิเคราะห์โค้ดของคุณ...",
+  "neocode:autocomplete.progress.generating": "กำลังสร้างการแก้ไขที่แนะนำ...",
+  "neocode:autocomplete.progress.processing": "กำลังประมวลผลการแก้ไขที่แนะนำ...",
+  "neocode:autocomplete.progress.showing": "กำลังแสดงการแก้ไขที่แนะนำ...",
+  "neocode:autocomplete.input.title": "Neo Code: งานด่วน",
+  "neocode:autocomplete.input.placeholder": "เช่น 'รีแฟกเตอร์ฟังก์ชันนี้ให้มีประสิทธิภาพมากขึ้น'",
+  "neocode:autocomplete.commands.generateSuggestions": "Neo Code: สร้างการแก้ไขที่แนะนำ",
+  "neocode:autocomplete.commands.displaySuggestions": "แสดงการแก้ไขที่แนะนำ",
+  "neocode:autocomplete.commands.cancelSuggestions": "ยกเลิกการแก้ไขที่แนะนำ",
+  "neocode:autocomplete.commands.applyCurrentSuggestion": "ใช้การแก้ไขที่แนะนำปัจจุบัน",
+  "neocode:autocomplete.commands.applyAllSuggestions": "ใช้การแก้ไขที่แนะนำทั้งหมด",
+  "neocode:autocomplete.commands.category": "Neo Code",
+  "neocode:autocomplete.codeAction.title": "Neo Code: การแก้ไขที่แนะนำ",
+  "neocode:autocomplete.chatParticipant.fullName": "ตัวแทน Neo Code",
+  "neocode:autocomplete.chatParticipant.name": "ตัวแทน",
+  "neocode:autocomplete.chatParticipant.description": "ฉันช่วยคุณทำงานด่วนและการแก้ไขที่แนะนำได้",
+  "neocode:autocomplete.incompatibilityExtensionPopup.message":
+    "การเติมข้อความอัตโนมัติของ Neo Code ถูกบล็อกเนื่องจากขัดแย้งกับ GitHub Copilot หากต้องการแก้ไข คุณต้องปิดข้อเสนอแนะแบบอินไลน์ของ Copilot",
+  "neocode:autocomplete.incompatibilityExtensionPopup.disableCopilot": "ปิดใช้งาน Copilot",
+  "neocode:autocomplete.incompatibilityExtensionPopup.disableInlineAssist": "ปิดใช้งานเติมข้อความอัตโนมัติ",
+  "neocode:autocomplete.creditsExhausted.message":
+    "การเติมข้อความอัตโนมัติของ Neo Code ถูกพักไว้ สาเหตุที่เป็นไปได้: บัญชี Neo ของคุณไม่มีเครดิตเหลืออยู่ หรือคีย์ API ที่กำหนดค่าไว้ (BYOK) ถึงขีดจำกัดโควตาแล้ว เพิ่มเครดิต Neo หรือตรวจสอบการกำหนดค่าคีย์ API เพื่อเริ่มใช้การเติมข้อความอัตโนมัติต่อ",
+  "neocode:autocomplete.creditsExhausted.addCredits": "เพิ่มเครดิต",
+  "neocode:autocomplete.authError.message":
+    "การเติมข้อความอัตโนมัติของ Neo Code ถูกพักไว้เนื่องจากปัญหาการยืนยันตัวตน สาเหตุที่เป็นไปได้: คุณไม่ได้ลงชื่อเข้าใช้ Neo หรือคีย์ API (BYOK) ของคุณไม่ถูกต้องหรือหายไป โปรดลงชื่อเข้าใช้อีกครั้งหรือตรวจสอบการตั้งค่าคีย์ API ของผู้ให้บริการ",
+}

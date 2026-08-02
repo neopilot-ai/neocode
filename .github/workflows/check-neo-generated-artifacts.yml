@@ -1,0 +1,27 @@
+# neocode_change - new file
+name: Check Neo generated artifacts
+
+on:
+  pull_request:
+    paths:
+      - ".gitignore"
+      - ".github/workflows/check-neo-generated-artifacts.yml"
+      - ".neo/**"
+      - ".neocode/**"
+      - "script/check-neo-generated-artifacts.ts"
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: Check Neo generated artifacts
+    if: github.repository == 'Neopilot-Ai/neocode'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6 # neocode_change
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Run check
+        run: bun run script/check-neo-generated-artifacts.ts

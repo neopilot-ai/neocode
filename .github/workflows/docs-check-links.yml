@@ -1,0 +1,29 @@
+name: Check Links
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - "packages/neo-docs/**"
+      - ".github/workflows/docs-check-links.yml"
+  schedule:
+    # Run daily at 9am UTC
+    - cron: "0 9 * * *"
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  link-checker:
+    if: github.repository == 'Neopilot-Ai/neocode'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6 # neocode_change
+
+      - name: Link Checker
+        uses: Neopilot-Ai/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411
+        with:
+          args: "**/*.md"
+          workingDirectory: packages/neo-docs
+          fail: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

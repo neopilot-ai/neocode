@@ -1,0 +1,13 @@
+# neocode_change - new file
+name: "Setup Neo"
+description: "Install Neo CLI globally"
+runs:
+  using: "composite"
+  steps:
+    - name: Install Neo CLI
+      run: curl -fsSL https://neo.khulnasoft.com/cli/install | bash
+      shell: bash
+
+    - name: Add Neo to PATH
+      run: echo "$HOME/.neo/bin" >> $GITHUB_PATH
+      shell: bash

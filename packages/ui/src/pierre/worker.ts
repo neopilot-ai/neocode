@@ -1,5 +1,14 @@
 import { WorkerPoolManager } from "@pierre/diffs/worker"
 import ShikiWorkerUrl from "@pierre/diffs/worker/worker.js?worker&url"
+import { ensureNeoDiffTheme, NEO_DIFF_THEME } from "./neo-diff-theme" // neocode_change
+
+// neocode_change start: register the "Neo" theme as a precondition of creating
+// any diff worker pool. resolveThemes([theme]) runs on the main thread during
+// initialize(); without the theme registered it throws "resolveTheme: No valid
+// loader for Neo". Doing it here means every diff component (which imports this
+// factory) is covered, instead of relying on the markdown context being imported.
+ensureNeoDiffTheme()
+// neocode_change end
 
 export type WorkerPoolStyle = "unified" | "split"
 
@@ -13,19 +22,19 @@ function createPool(lineDiffType: "none" | "word-alt") {
       workerFactory,
       // poolSize defaults to 8. More workers = more parallelism but
       // also more memory. Too many can actually slow things down.
-      // NOTE: 2 is probably better for NeoCode, as I think 8 might be
+      // NOTE: 2 is probably better for Neo, as I think 8 might be
       // a bit overkill, especially because Safari has a significantly slower
       // boot up time for workers
       poolSize: 2,
     },
     {
-      theme: "NeoCode",
+      theme: NEO_DIFF_THEME, // neocode_change
       lineDiffType,
       preferredHighlighter: "shiki-wasm",
     },
   )
 
-  pool.initialize()
+  void pool.initialize()
   return pool
 }
 

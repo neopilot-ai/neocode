@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
-APP=neocode
+APP=neo # neocode_change
 
 MUTED='\033[0;2m'
 RED='\033[0;31m'
 ORANGE='\033[38;5;214m'
 NC='\033[0m' # No Color
 
+# neocode_change start - usage text
 usage() {
     cat <<EOF
-NeoCode Installer
+Neo Code Installer
 
-Usage: install.sh [options]
+Usage: install [options]
 
 Options:
     -h, --help              Display this help message
@@ -20,11 +21,12 @@ Options:
         --no-modify-path    Don't modify shell config files (.zshrc, .bashrc, etc.)
 
 Examples:
-    curl -fsSL https://raw.githubusercontent.com/neopilot-ai/neocode/refs/heads/dev/install | bash
-    curl -fsSL https://raw.githubusercontent.com/neopilot-ai/neocode/refs/heads/dev/install | bash -s -- --version 1.0.180
-    ./install --binary /path/to/neocode
+    curl -fsSL https://neo.khulnasoft.com/cli/install | bash
+    curl -fsSL https://neo.khulnasoft.com/cli/install | bash -s -- --version 1.0.180
+    ./install --binary /path/to/neo
 EOF
 }
+# neocode_change end
 
 requested_version=${VERSION:-}
 no_modify_path=false
@@ -65,7 +67,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-INSTALL_DIR=$HOME/.neocode/bin
+INSTALL_DIR=$HOME/.neo/bin # neocode_change
 mkdir -p "$INSTALL_DIR"
 
 # If --binary is provided, skip all download/detection logic
@@ -130,7 +132,7 @@ else
     needs_baseline=false
     if [ "$arch" = "x64" ]; then
       if [ "$os" = "linux" ]; then
-        if ! grep -qi avx2 /proc/cpuinfo 2>/dev/null; then
+        if ! grep -qwi avx2 /proc/cpuinfo 2>/dev/null; then
           needs_baseline=true
         fi
       fi
@@ -138,6 +140,20 @@ else
       if [ "$os" = "darwin" ]; then
         avx2=$(sysctl -n hw.optional.avx2_0 2>/dev/null || echo 0)
         if [ "$avx2" != "1" ]; then
+          needs_baseline=true
+        fi
+      fi
+
+      if [ "$os" = "windows" ]; then
+        ps="(Add-Type -MemberDefinition \"[DllImport(\"\"kernel32.dll\"\")] public static extern bool IsProcessorFeaturePresent(int ProcessorFeature);\" -Name Kernel32 -Namespace Win32 -PassThru)::IsProcessorFeaturePresent(40)"
+        out=""
+        if command -v powershell.exe >/dev/null 2>&1; then
+          out=$(powershell.exe -NoProfile -NonInteractive -Command "$ps" 2>/dev/null || true)
+        elif command -v pwsh >/dev/null 2>&1; then
+          out=$(pwsh -NoProfile -NonInteractive -Command "$ps" 2>/dev/null || true)
+        fi
+        out=$(echo "$out" | tr -d '\r' | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]')
+        if [ "$out" != "true" ] && [ "$out" != "1" ]; then
           needs_baseline=true
         fi
       fi
@@ -167,24 +183,28 @@ else
     fi
 
     if [ -z "$requested_version" ]; then
-        url="https://github.com/neopilot-ai/neocode/releases/latest/download/$filename"
-        specific_version=$(curl -s https://api.github.com/repos/neopilot-ai/neocode/releases/latest | sed -n 's/.*"tag_name": *"v\([^"]*\)".*/\1/p')
-
-        if [[ $? -ne 0 || -z "$specific_version" ]]; then
+        # The npm latest tag tracks stable CLI releases independently of other GitHub release types.
+        if ! specific_version=$(curl -fsSL "https://registry.npmjs.org/-/package/%40neocode%2Fcli/dist-tags" |
+            sed -n 's/.*"latest"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'); then
             echo -e "${RED}Failed to fetch version information${NC}"
             exit 1
         fi
+        if [[ ! "$specific_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo -e "${RED}Failed to fetch version information${NC}"
+            exit 1
+        fi
+        url="https://github.com/Neopilot-Ai/neocode/releases/download/v${specific_version}/$filename"
     else
         # Strip leading 'v' if present
         requested_version="${requested_version#v}"
-        url="https://github.com/neopilot-ai/neocode/releases/download/v${requested_version}/$filename"
+        url="https://github.com/Neopilot-Ai/neocode/releases/download/v${requested_version}/$filename"
         specific_version=$requested_version
 
         # Verify the release exists before downloading
-        http_status=$(curl -sI -o /dev/null -w "%{http_code}" "https://github.com/neopilot-ai/neocode/releases/tag/v${requested_version}")
+        http_status=$(curl -sI -o /dev/null -w "%{http_code}" "https://github.com/Neopilot-Ai/neocode/releases/tag/v${requested_version}")
         if [ "$http_status" = "404" ]; then
             echo -e "${RED}Error: Release v${requested_version} not found${NC}"
-            echo -e "${MUTED}Available releases: https://github.com/neopilot-ai/neocode/releases${NC}"
+            echo -e "${MUTED}Available releases: https://github.com/Neopilot-Ai/neocode/releases${NC}"
             exit 1
         fi
     fi
@@ -204,12 +224,13 @@ print_message() {
     echo -e "${color}${message}${NC}"
 }
 
+# neocode_change start
 check_version() {
-    if command -v neocode >/dev/null 2>&1; then
-        neocode_path=$(which neocode)
+    if command -v neo >/dev/null 2>&1; then
+        neo_path=$(which neo)
 
         ## Check the installed version
-        installed_version=$(neocode --version 2>/dev/null || echo "")
+        installed_version=$(neo --version 2>/dev/null || echo "")
 
         if [[ "$installed_version" != "$specific_version" ]]; then
             print_message info "${MUTED}Installed version: ${NC}$installed_version."
@@ -219,6 +240,7 @@ check_version() {
         fi
     fi
 }
+# neocode_change end
 
 unbuffered_sed() {
     if echo | sed -u -e "" >/dev/null 2>&1; then
@@ -261,7 +283,7 @@ download_with_progress() {
     fi
 
     local tmp_dir=${TMPDIR:-/tmp}
-    local basename="${tmp_dir}/neocode_install_$$"
+    local basename="${tmp_dir}/neo_install_$$" # neocode_change
     local tracefile="${basename}.trace"
 
     rm -f "$tracefile"
@@ -273,7 +295,7 @@ download_with_progress() {
     trap "trap - RETURN; rm -f \"$tracefile\"; printf '\033[?25h' >&4; exec 4>&-" RETURN
 
     (
-        curl --trace-ascii "$tracefile" -s -L -o "$output" "$url"
+        curl --trace-ascii "$tracefile" -fsL -o "$output" "$url" # neocode_change
     ) &
     local curl_pid=$!
 
@@ -311,13 +333,15 @@ download_with_progress() {
 }
 
 download_and_install() {
-    print_message info "\n${MUTED}Installing ${NC}neocode ${MUTED}version: ${NC}$specific_version"
-    local tmp_dir="${TMPDIR:-/tmp}/neocode_install_$$"
+    # neocode_change start
+    print_message info "\n${MUTED}Installing ${NC}Neo Code ${MUTED}version: ${NC}$specific_version"
+    local tmp_dir="${TMPDIR:-/tmp}/neo_install_$$"
+    # neocode_change end
     mkdir -p "$tmp_dir"
 
     if [[ "$os" == "windows" ]] || ! [ -t 2 ] || ! download_with_progress "$url" "$tmp_dir/$filename"; then
         # Fallback to standard curl on Windows, non-TTY environments, or if custom progress fails
-        curl -# -L -o "$tmp_dir/$filename" "$url"
+        curl -f# -L -o "$tmp_dir/$filename" "$url" # neocode_change
     fi
 
     if [ "$os" = "linux" ]; then
@@ -326,15 +350,23 @@ download_and_install() {
         unzip -q "$tmp_dir/$filename" -d "$tmp_dir"
     fi
 
-    mv "$tmp_dir/neocode" "$INSTALL_DIR"
-    chmod 755 "${INSTALL_DIR}/neocode"
+    # neocode_change start
+    mv "$tmp_dir/neo" "$INSTALL_DIR"
+    rm -rf "${INSTALL_DIR}/tree-sitter"
+    if [ -d "$tmp_dir/tree-sitter" ]; then
+        mv "$tmp_dir/tree-sitter" "$INSTALL_DIR"
+    fi
+    chmod 755 "${INSTALL_DIR}/neo"
+    # neocode_change end
     rm -rf "$tmp_dir"
 }
 
 install_from_binary() {
-    print_message info "\n${MUTED}Installing ${NC}neocode ${MUTED}from: ${NC}$binary_path"
-    cp "$binary_path" "${INSTALL_DIR}/neocode"
-    chmod 755 "${INSTALL_DIR}/neocode"
+    # neocode_change start
+    print_message info "\n${MUTED}Installing ${NC}Neo Code ${MUTED}from: ${NC}$binary_path"
+    cp "$binary_path" "${INSTALL_DIR}/neo"
+    chmod 755 "${INSTALL_DIR}/neo"
+    # neocode_change end
 }
 
 if [ -n "$binary_path" ]; then
@@ -352,13 +384,64 @@ add_to_path() {
     if grep -Fxq "$command" "$config_file"; then
         print_message info "Command already exists in $config_file, skipping write."
     elif [[ -w $config_file ]]; then
-        echo -e "\n# neocode" >> "$config_file"
+        echo -e "\n# neo" >> "$config_file" # neocode_change
         echo "$command" >> "$config_file"
-        print_message info "${MUTED}Successfully added ${NC}neocode ${MUTED}to \$PATH in ${NC}$config_file"
+        print_message info "${MUTED}Successfully added ${NC}neo ${MUTED}to \$PATH in ${NC}$config_file" # neocode_change
     else
         print_message warning "Manually add the directory to $config_file (or similar):"
         print_message info "  $command"
     fi
+}
+
+# Persistently add $INSTALL_DIR to the Windows user PATH via the registry.
+# Works from Git Bash (MINGW64), MSYS2, and Cygwin.
+# Converts the MSYS/Cygwin path to native Windows form so that cmd and
+# PowerShell also see the entry.
+add_to_windows_path() {
+    local win_install_dir
+    if command -v cygpath >/dev/null 2>&1; then
+        win_install_dir=$(cygpath -w "$INSTALL_DIR")
+    else
+        # Fallback: naive conversion  /c/Users/... -> C:\Users\...
+        win_install_dir=$(echo "$INSTALL_DIR" | sed -e 's|^/\([a-zA-Z]\)/|\1:\\|' -e 's|/|\\|g')
+    fi
+
+    # Escape single-quotes for PowerShell single-quoted strings ('' is the escape sequence)
+    local win_install_dir_ps="${win_install_dir//\'/\'\'}"
+
+    local ps_cmd
+    ps_cmd=$(cat <<EOFPS
+\$neoPath = '$win_install_dir_ps'
+\$currentPath = [Environment]::GetEnvironmentVariable('Path', 'User')
+\$pathParts = if ([string]::IsNullOrEmpty(\$currentPath)) { @() } else { \$currentPath -split ';' }
+if (\$pathParts -notcontains \$neoPath) {
+    \$newPath = if ([string]::IsNullOrEmpty(\$currentPath)) { \$neoPath } else { "\$currentPath;\$neoPath" }
+    [Environment]::SetEnvironmentVariable('Path', \$newPath, 'User')
+    Write-Output 'added'
+}
+EOFPS
+)
+
+    local ps_output
+    if command -v powershell.exe >/dev/null 2>&1; then
+        ps_output=$(powershell.exe -NoProfile -NonInteractive -Command "$ps_cmd" 2>/dev/null) || return 1
+    elif command -v pwsh >/dev/null 2>&1; then
+        ps_output=$(pwsh -NoProfile -NonInteractive -Command "$ps_cmd" 2>/dev/null) || return 1
+    else
+        return 1
+    fi
+
+    if [[ "$ps_output" == *"added"* ]]; then
+        print_message info "${MUTED}Successfully added ${NC}neo ${MUTED}to Windows user PATH${NC}"
+    fi
+
+    # Also add to the current bash session so `neo` works immediately
+    # without the user needing to open a new terminal.
+    if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
+        export PATH="$INSTALL_DIR:$PATH"
+    fi
+
+    return 0
 }
 
 XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
@@ -387,6 +470,13 @@ case $current_shell in
 esac
 
 if [[ "$no_modify_path" != "true" ]]; then
+    # Detect if we are running on Windows (MINGW, MSYS, Cygwin) regardless
+    # of whether the binary was installed from download or --binary.
+    _running_on_windows=false
+    case "$(uname -s)" in
+        MINGW*|MSYS*|CYGWIN*) _running_on_windows=true ;;
+    esac
+
     config_file=""
     for file in $config_files; do
         if [[ -f $file ]]; then
@@ -395,7 +485,12 @@ if [[ "$no_modify_path" != "true" ]]; then
         fi
     done
 
-    if [[ -z $config_file ]]; then
+    if [[ "$_running_on_windows" == "true" ]] && add_to_windows_path; then
+        # Handled via the Windows user-level PATH in the registry.
+        # The change is visible in new cmd / PowerShell / Git Bash sessions.
+        # We also exported it into the current session above.
+        :
+    elif [[ -z $config_file ]]; then
         print_message warning "No config file found for $current_shell. You may need to manually add to PATH:"
         print_message info "  export PATH=$INSTALL_DIR:\$PATH"
     elif [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
@@ -429,18 +524,55 @@ if [ -n "${GITHUB_ACTIONS-}" ] && [ "${GITHUB_ACTIONS}" == "true" ]; then
     print_message info "Added $INSTALL_DIR to \$GITHUB_PATH"
 fi
 
+# neocode_change start
+logo_supports() {
+    case "${NEO_UNICODE_LOGO:-}" in
+        1|true|TRUE|yes|YES|on|ON)
+            return 0
+        ;;
+        0|false|FALSE|no|NO|off|OFF)
+            return 1
+        ;;
+    esac
+
+    if [ "${TERM:-}" = "dumb" ]; then
+        return 1
+    fi
+
+    if [ -n "${SSH_TTY:-}" ] || [ -n "${SSH_CLIENT:-}" ] || [ -n "${SSH_CONNECTION:-}" ]; then
+        return 1
+    fi
+
+    if [ -n "${ConEmuPID:-}" ] || [ -n "${ANSICON:-}" ]; then
+        return 1
+    fi
+
+    return 0
+}
+
+print_logo() {
+    if logo_supports; then
+        echo -e "██  ██ ██🬺🬏   ██  ██   ██🬺🬏     ████ ██     ██🬺🬏   "
+        echo -e "████🬺🬏   ██   ██     ██  ██   ██     ██       ██   "
+        echo -e "██  ██ ██████ 🬁🬬████ 🬁🬬██     🬁🬬████ 🬁🬬████ ██████ "
+        return
+    fi
+
+    echo -e "██  ██ ████   ██  ██   ███      ████ ██     ████   "
+    echo -e "████     ██   ██     ██  ██   ██     ██       ██   "
+    echo -e "██  ██ ██████ ██████   ██       ████ ██████ ██████ "
+}
+
 echo -e ""
-echo -e "${MUTED}                    ${NC}             ▄     "
-echo -e "${MUTED}█▀▀█ █▀▀█ █▀▀█ █▀▀▄ ${NC}█▀▀▀ █▀▀█ █▀▀█ █▀▀█"
-echo -e "${MUTED}█░░█ █░░█ █▀▀▀ █░░█ ${NC}█░░░ █░░█ █░░█ █▀▀▀"
-echo -e "${MUTED}▀▀▀▀ █▀▀▀ ▀▀▀▀ ▀  ▀ ${NC}▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀"
+print_logo
 echo -e ""
 echo -e ""
-echo -e "${MUTED}NeoCode includes free models, to start:${NC}"
+echo -e "${MUTED}Neo includes free models so you can start immediately:${NC}"
 echo -e ""
 echo -e "cd <project>  ${MUTED}# Open directory${NC}"
-echo -e "neocode      ${MUTED}# Run command${NC}"
+echo -e "neo          ${MUTED}# Run Neo${NC}"
 echo -e ""
 echo -e "${MUTED}For more information visit ${NC}https://neo.khulnasoft.com/docs"
 echo -e ""
 echo -e ""
+# neocode_change end

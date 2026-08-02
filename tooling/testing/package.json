@@ -1,9 +1,0 @@
-{
-  "name": "@neocode-ai/tool-testing",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "exports": {
-    "./bunfig": "./bunfig.toml"
-  }
-}

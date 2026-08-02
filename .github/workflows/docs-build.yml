@@ -1,0 +1,30 @@
+name: docs-build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packages/neo-docs/**"
+  pull_request:
+    paths:
+      - "packages/neo-docs/**"
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build docs site
+    runs-on: ubuntu-latest # neocode_change
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6 # neocode_change
+
+      - name: Setup Bun
+        uses: ./.github/actions/setup-bun
+
+      - name: Build site
+        run: bun run --filter @neocode/neo-docs build
+        env:
+          NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.POSTHOG_API_KEY }}
+
+      - name: Run tests
+        run: bun run --filter @neocode/neo-docs test

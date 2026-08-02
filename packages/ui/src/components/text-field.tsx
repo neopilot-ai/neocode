@@ -6,8 +6,7 @@ import { IconButton } from "./icon-button"
 import { Tooltip } from "./tooltip"
 
 export interface TextFieldProps
-  extends
-    ComponentProps<typeof Kobalte.Input>,
+  extends ComponentProps<typeof Kobalte.Input>,
     Partial<
       Pick<
         ComponentProps<typeof Kobalte>,
@@ -76,7 +75,7 @@ export function TextField(props: TextFieldProps) {
   }
 
   function handleClick() {
-    if (local.copyable) handleCopy()
+    if (local.copyable) void handleCopy()
   }
 
   return (

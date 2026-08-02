@@ -1,0 +1,47 @@
+export const dict = {
+  "neocode:autocomplete.statusBar.enabled": "$(neo-logo) Completamento automatico",
+  "neocode:autocomplete.statusBar.snoozed": "posticipato",
+  "neocode:autocomplete.statusBar.warning": "$(warning) Completamento automatico",
+  "neocode:autocomplete.statusBar.tooltip.basic": "Completamento automatico Neo Code",
+  "neocode:autocomplete.statusBar.tooltip.disabled": "Completamento automatico Neo Code (disabilitato)",
+  "neocode:autocomplete.statusBar.tooltip.noUsableProvider":
+    "**Nessun modello di completamento automatico configurato**\n\nPer abilitare il completamento automatico, aggiungi un profilo con uno di questi provider supportati: {{providers}}.\n\n[Apri impostazioni]({{command}})",
+  "neocode:autocomplete.statusBar.tooltip.sessionTotal": "Costo totale della sessione:",
+  "neocode:autocomplete.statusBar.tooltip.provider": "Fornitore:",
+  "neocode:autocomplete.statusBar.tooltip.model": "Modello:",
+  "neocode:autocomplete.statusBar.tooltip.profile": "Profilo: ",
+  "neocode:autocomplete.statusBar.tooltip.defaultProfile": "Predefinito",
+  "neocode:autocomplete.statusBar.tooltip.completionSummary":
+    "Eseguiti {{count}} completamenti tra {{startTime}} e {{endTime}}, per un costo totale di {{cost}}.",
+  "neocode:autocomplete.statusBar.tooltip.providerInfo":
+    "Completamenti automatici forniti da {{model}} tramite {{provider}}.",
+  "neocode:autocomplete.statusBar.cost.zero": "$0.00",
+  "neocode:autocomplete.statusBar.cost.lessThanCent": "<$0.01",
+  "neocode:autocomplete.toggleMessage": "Completamento automatico Neo Code {{status}}",
+  "neocode:autocomplete.progress.title": "Neo Code",
+  "neocode:autocomplete.progress.analyzing": "Analisi del codice in corso...",
+  "neocode:autocomplete.progress.generating": "Generazione delle modifiche suggerite...",
+  "neocode:autocomplete.progress.processing": "Elaborazione delle modifiche suggerite...",
+  "neocode:autocomplete.progress.showing": "Visualizzazione delle modifiche suggerite...",
+  "neocode:autocomplete.input.title": "Neo Code: attività rapida",
+  "neocode:autocomplete.input.placeholder": "es. 'rifattorizza questa funzione per renderla più efficiente'",
+  "neocode:autocomplete.commands.generateSuggestions": "Neo Code: genera modifiche suggerite",
+  "neocode:autocomplete.commands.displaySuggestions": "Mostra modifiche suggerite",
+  "neocode:autocomplete.commands.cancelSuggestions": "Annulla modifiche suggerite",
+  "neocode:autocomplete.commands.applyCurrentSuggestion": "Applica la modifica suggerita corrente",
+  "neocode:autocomplete.commands.applyAllSuggestions": "Applica tutte le modifiche suggerite",
+  "neocode:autocomplete.commands.category": "Neo Code",
+  "neocode:autocomplete.codeAction.title": "Neo Code: modifiche suggerite",
+  "neocode:autocomplete.chatParticipant.fullName": "Agente Neo Code",
+  "neocode:autocomplete.chatParticipant.name": "Agente",
+  "neocode:autocomplete.chatParticipant.description": "Posso aiutarti con attività rapide e modifiche suggerite.",
+  "neocode:autocomplete.incompatibilityExtensionPopup.message":
+    "Il completamento automatico di Neo Code è bloccato da un conflitto con GitHub Copilot. Per risolvere il problema, devi disabilitare i suggerimenti inline di Copilot.",
+  "neocode:autocomplete.incompatibilityExtensionPopup.disableCopilot": "Disabilita Copilot",
+  "neocode:autocomplete.incompatibilityExtensionPopup.disableInlineAssist": "Disabilita completamento automatico",
+  "neocode:autocomplete.creditsExhausted.message":
+    "Il completamento automatico di Neo Code è stato messo in pausa. Possibili cause: il tuo account Neo non ha crediti residui, oppure la chiave API configurata (BYOK) ha raggiunto il limite di quota. Aggiungi crediti Neo o controlla la configurazione della chiave API per riprendere il completamento automatico.",
+  "neocode:autocomplete.creditsExhausted.addCredits": "Aggiungi crediti",
+  "neocode:autocomplete.authError.message":
+    "Il completamento automatico di Neo Code è stato messo in pausa a causa di un problema di autenticazione. Possibili cause: non hai effettuato l’accesso a Neo, oppure la tua chiave API (BYOK) non è valida o manca. Accedi di nuovo o controlla le impostazioni della chiave API del provider.",
+}

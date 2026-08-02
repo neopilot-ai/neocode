@@ -1,0 +1,5 @@
+/* Neo Inline Input overrides */
+
+[data-component="inline-input"] {
+  font-size: var(--neo-font-size-13);
+}

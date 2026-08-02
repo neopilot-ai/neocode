@@ -1,15 +1,23 @@
 import { useMarked } from "../context/marked"
+import { deferredHighlight, fnv1a } from "../context/marked" // neocode_change
 import { useI18n } from "../context/i18n"
 import DOMPurify from "dompurify"
 import morphdom from "morphdom"
-import { checksum } from "@neocode-ai/pkg-utils/encode"
+import { checksum } from "@opencode-ai/core/util/encode"
 import { ComponentProps, createEffect, createResource, createSignal, onCleanup, splitProps } from "solid-js"
 import { isServer } from "solid-js/web"
+import { stream } from "./markdown-stream"
+import { tryFastRender } from "../neocode/markdown-fast-path" // neocode_change
+import { hasMermaid, preserveMermaid, renderMermaid, type MermaidLabels } from "../neocode/markdown-mermaid" // neocode_change
+import { preserveStreamingHighlight } from "../neocode/markdown-stream-highlight" // neocode_change
+import { createIncrementalMarkdown, type MarkdownBlock } from "../neocode/markdown-incremental-dom" // neocode_change
 
 type Entry = {
   hash: string
   html: string
 }
+
+type Rendered = { content: string; blocks: MarkdownBlock[] } // neocode_change
 
 const max = 200
 const cache = new Map<string, Entry>()
@@ -32,6 +40,8 @@ const config = {
   SANITIZE_NAMED_PROPS: true,
   FORBID_TAGS: ["style"],
   FORBID_CONTENTS: ["style", "script"],
+  ADD_TAGS: ["svg", "path"],
+  ADD_ATTR: ["d", "viewBox", "preserveAspectRatio", "xmlns", "target"],
 }
 
 const iconPaths = {
@@ -42,6 +52,19 @@ const iconPaths = {
 function sanitize(html: string) {
   if (!DOMPurify.isSupported) return ""
   return DOMPurify.sanitize(html, config)
+}
+
+function escape(text: string) {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+}
+
+function fallback(markdown: string) {
+  return escape(markdown).replace(/\r\n?/g, "\n").replace(/\n/g, "<br>")
 }
 
 type CopyLabels = {
@@ -103,53 +126,77 @@ function setCopyState(button: HTMLButtonElement, labels: CopyLabels, copied: boo
   button.setAttribute("data-tooltip", labels.copy)
 }
 
-function setupCodeCopy(root: HTMLDivElement, labels: CopyLabels) {
-  const timeouts = new Map<HTMLButtonElement, ReturnType<typeof setTimeout>>()
-
-  const updateLabel = (button: HTMLButtonElement) => {
-    const copied = button.getAttribute("data-copied") === "true"
-    setCopyState(button, labels, copied)
-  }
-
-  const ensureWrapper = (block: HTMLPreElement) => {
-    const parent = block.parentElement
-    if (!parent) return
-    const wrapped = parent.getAttribute("data-component") === "markdown-code"
-    if (wrapped) return
+function ensureCodeWrapper(block: HTMLPreElement, labels: CopyLabels) {
+  const parent = block.parentElement
+  if (!parent) return
+  const wrapped = parent.getAttribute("data-component") === "markdown-code"
+  if (!wrapped) {
     const wrapper = document.createElement("div")
     wrapper.setAttribute("data-component", "markdown-code")
     parent.replaceChild(wrapper, block)
     wrapper.appendChild(block)
     wrapper.appendChild(createCopyButton(labels))
+    return
   }
 
-  const markCodeLinks = () => {
-    const codeNodes = Array.from(root.querySelectorAll(":not(pre) > code"))
-    for (const code of codeNodes) {
-      const href = codeUrl(code.textContent ?? "")
-      const parentLink =
-        code.parentElement instanceof HTMLAnchorElement && code.parentElement.classList.contains("external-link")
-          ? code.parentElement
-          : null
+  const buttons = Array.from(parent.querySelectorAll('[data-slot="markdown-copy-button"]')).filter(
+    (el): el is HTMLButtonElement => el instanceof HTMLButtonElement,
+  )
 
-      if (!href) {
-        if (parentLink) parentLink.replaceWith(code)
-        continue
-      }
+  if (buttons.length === 0) {
+    parent.appendChild(createCopyButton(labels))
+    return
+  }
 
-      if (parentLink) {
-        parentLink.href = href
-        continue
-      }
+  for (const button of buttons.slice(1)) {
+    button.remove()
+  }
+}
 
-      const link = document.createElement("a")
-      link.href = href
-      link.className = "external-link"
-      link.target = "_blank"
-      link.rel = "noopener noreferrer"
-      code.parentNode?.replaceChild(link, code)
-      link.appendChild(code)
+function markCodeLinks(root: HTMLDivElement) {
+  const codeNodes = Array.from(root.querySelectorAll(":not(pre) > code"))
+  for (const code of codeNodes) {
+    const href = codeUrl(code.textContent ?? "")
+    const parentLink =
+      code.parentElement instanceof HTMLAnchorElement && code.parentElement.classList.contains("external-link")
+        ? code.parentElement
+        : null
+
+    if (!href) {
+      if (parentLink) parentLink.replaceWith(code)
+      continue
     }
+
+    if (parentLink) {
+      parentLink.href = href
+      continue
+    }
+
+    const link = document.createElement("a")
+    link.href = href
+    link.className = "external-link"
+    link.target = "_blank"
+    link.rel = "noopener noreferrer"
+    code.parentNode?.replaceChild(link, code)
+    link.appendChild(code)
+  }
+}
+
+function decorate(root: HTMLDivElement, labels: CopyLabels) {
+  const blocks = Array.from(root.querySelectorAll("pre"))
+  for (const block of blocks) {
+    ensureCodeWrapper(block, labels)
+  }
+  markCodeLinks(root)
+}
+
+function setupCodeCopy(root: HTMLDivElement, getLabels: () => CopyLabels) {
+  const timeouts = new Map<HTMLButtonElement, ReturnType<typeof setTimeout>>()
+
+  const updateLabel = (button: HTMLButtonElement) => {
+    const labels = getLabels()
+    const copied = button.getAttribute("data-copied") === "true"
+    setCopyState(button, labels, copied)
   }
 
   const handleClick = async (event: MouseEvent) => {
@@ -164,18 +211,13 @@ function setupCodeCopy(root: HTMLDivElement, labels: CopyLabels) {
     const clipboard = navigator?.clipboard
     if (!clipboard) return
     await clipboard.writeText(content)
+    const labels = getLabels()
     setCopyState(button, labels, true)
     const existing = timeouts.get(button)
     if (existing) clearTimeout(existing)
     const timeout = setTimeout(() => setCopyState(button, labels, false), 2000)
     timeouts.set(button, timeout)
   }
-
-  const blocks = Array.from(root.querySelectorAll("pre"))
-  for (const block of blocks) {
-    ensureWrapper(block)
-  }
-  markCodeLinks()
 
   const buttons = Array.from(root.querySelectorAll('[data-slot="markdown-copy-button"]'))
   for (const button of buttons) {
@@ -207,98 +249,304 @@ export function Markdown(
   props: ComponentProps<"div"> & {
     text: string
     cacheKey?: string
+    streaming?: boolean
     class?: string
     classList?: Record<string, boolean>
   },
 ) {
-  const [local, others] = splitProps(props, ["text", "cacheKey", "class", "classList"])
+  const [local, others] = splitProps(props, ["text", "cacheKey", "streaming", "class", "classList"])
   const marked = useMarked()
   const i18n = useI18n()
   const [root, setRoot] = createSignal<HTMLDivElement>()
   const [html] = createResource(
-    () => local.text,
-    async (markdown) => {
-      if (isServer) return ""
+    () => ({
+      text: local.text,
+      key: local.cacheKey,
+      streaming: local.streaming ?? false,
+    }),
+    // neocode_change start
+    async (src): Promise<Rendered> => {
+      // neocode_change end
+      if (isServer) return { content: fallback(src.text), blocks: [] } // neocode_change
+      if (!src.text) return { content: "", blocks: [] } // neocode_change
 
-      const hash = checksum(markdown)
-      const key = local.cacheKey ?? hash
+      const base = src.key ?? checksum(src.text)
+      return Promise.all(
+        stream(src.text, src.streaming).map(async (block, index) => {
+          const hash = checksum(block.raw) ?? "" // neocode_change
+          const key = base ? `${base}:${index}:${block.mode}` : hash
 
-      if (key && hash) {
-        const cached = cache.get(key)
-        if (cached && cached.hash === hash) {
-          touch(key, cached)
-          return cached.html
-        }
-      }
+          if (key && hash) {
+            const cached = cache.get(key)
+            if (cached && cached.hash === hash) {
+              touch(key, cached)
+              return { key: `${base}:${index}`, hash, html: cached.html, mode: block.mode } // neocode_change
+            }
+          }
 
-      const next = await marked.parse(markdown)
-      const safe = sanitize(next)
-      if (key && hash) touch(key, { hash, html: safe })
-      return safe
+          const next = await Promise.resolve(marked.parse(block.src))
+          const safe = sanitize(next)
+          if (key && hash) touch(key, { hash, html: safe })
+          return { key: `${base}:${index}`, hash, html: safe, mode: block.mode } // neocode_change
+        }),
+      )
+        .then((blocks) => ({ content: blocks.map((block) => block.html).join(""), blocks })) // neocode_change
+        .catch(() => ({ content: fallback(src.text), blocks: [] })) // neocode_change
     },
-    { initialValue: "" },
+    { initialValue: { content: fallback(local.text), blocks: [] } }, // neocode_change
   )
 
-  let copySetupTimer: ReturnType<typeof setTimeout> | undefined
   let copyCleanup: (() => void) | undefined
+  // neocode_change start: generation counter prevents stale deferredHighlight
+  // callbacks from overwriting copyCleanup set by a newer render (issue #6221).
+  // The abort signal cancels the previous in-flight highlight pass so rapid
+  // streaming tokens don't spawn concurrent passes racing on the same DOM nodes.
+  const highlightState = { gen: 0, signal: { aborted: false } }
+  // neocode_change end
+
+  // neocode_change start: Mermaid diagram rendering
+  const mermaidState = { gen: 0, signal: { aborted: false } }
+  // neocode_change end
+
+  // neocode_change start: rAF-coalesced morphdom render.
+  // During LLM token streaming, content updates arrive at 60–200Hz. Each
+  // token reparses the full accumulated HTML (temp.innerHTML = content) and
+  // diffs it via morphdom. CPU profile of a 7s streaming window showed 2,940
+  // ParseHTML events totaling ~619ms (~46% of blocked main-thread time). The
+  // user can only see one frame per 16ms anyway, so cap parses at ≤1 per
+  // animation frame.
+  let pendingFrame: number | undefined
+  let pendingContent: string | undefined
+  let pendingLabels: { copy: string; copied: string } | undefined
+  // neocode_change end
+  // neocode_change start
+  const incremental = createIncrementalMarkdown<MermaidLabels>(decorate, {
+    cancel: () => {
+      if (pendingFrame === undefined) return
+      cancelAnimationFrame(pendingFrame)
+      pendingFrame = undefined
+      pendingContent = undefined
+      pendingLabels = undefined
+    },
+    ready: (container, labels, mermaid) => {
+      copyCleanup ??= setupCodeCopy(container, () => labels)
+      kickMermaid(container, true, mermaid)
+      kickHighlight(container, labels)
+    },
+  })
+  // neocode_change end
 
   createEffect(() => {
     const container = root()
-    const content = html()
+    const rendered = html.latest ?? html() ?? { content: "", blocks: [] } // neocode_change
+    const content = local.text ? rendered.content : "" // neocode_change
     if (!container) return
     if (isServer) return
 
     if (!content) {
+      // neocode_change start: cancel any in-flight coalesced render so a
+      // clear takes precedence over a pending parse.
+      if (pendingFrame !== undefined) {
+        cancelAnimationFrame(pendingFrame)
+        pendingFrame = undefined
+        pendingContent = undefined
+        pendingLabels = undefined
+      }
+      // neocode_change end
+      incremental.reset() // neocode_change
       container.innerHTML = ""
+      // neocode_change start: Mermaid diagram rendering
+      mermaidState.signal.aborted = true
+      mermaidState.gen++
+      // neocode_change end
       return
     }
 
-    const temp = document.createElement("div")
-    temp.innerHTML = content
+    const labels = {
+      copy: i18n.t("ui.message.copy"),
+      copied: i18n.t("ui.message.copied"),
+    }
 
-    morphdom(container, temp, {
-      childrenOnly: true,
-      onBeforeElUpdated: (fromEl, toEl) => {
-        if (fromEl.isEqualNode(toEl)) return false
-        if (fromEl.getAttribute("data-component") === "markdown-code") {
-          const fromPre = fromEl.querySelector("pre")
-          const toPre = toEl.querySelector("pre")
-          if (fromPre && toPre && !fromPre.isEqualNode(toPre)) {
-            morphdom(fromPre, toPre)
+    // neocode_change start: Mermaid diagram rendering
+    const mermaid = {
+      rendering: i18n.t("ui.mermaid.rendering"),
+      renderError: (message: string) => i18n.t("ui.mermaid.renderError", { message }),
+      errorDefault: i18n.t("ui.mermaid.errorDefault"),
+      errorEmpty: i18n.t("ui.mermaid.errorEmpty"),
+      copied: i18n.t("ui.message.copied"),
+      copy: i18n.t("ui.message.copy"),
+      download: i18n.t("ui.mermaid.download"),
+      copySource: i18n.t("ui.mermaid.copySource"),
+      copySvg: i18n.t("ui.mermaid.copySvg"),
+      copyPng: i18n.t("ui.mermaid.copyPng"),
+      downloadSvg: i18n.t("ui.mermaid.downloadSvg"),
+      downloadPng: i18n.t("ui.mermaid.downloadPng"),
+    }
+    // neocode_change end
+
+    // neocode_change start
+    const fast = tryFastRender(container, content, local.streaming, decorate, setupCodeCopy, () => labels, copyCleanup)
+    if (fast.handled) {
+      // Fast path took over; drop any pending coalesced morphdom from a
+      // previous streaming turn on this same element.
+      if (pendingFrame !== undefined) {
+        cancelAnimationFrame(pendingFrame)
+        pendingFrame = undefined
+        pendingContent = undefined
+        pendingLabels = undefined
+      }
+      incremental.reset() // neocode_change
+      copyCleanup = fast.copyCleanup
+      kickMermaid(container, local.streaming ?? false, mermaid)
+      kickHighlight(container, labels)
+      return
+    }
+    // neocode_change end
+
+    if (incremental.render(local.streaming ?? false, container, rendered.blocks, labels, mermaid)) return // neocode_change
+    incremental.reset() // neocode_change
+
+    // neocode_change start: queue the latest content for a single rAF tick.
+    // Further updates before the frame runs simply overwrite pendingContent,
+    // so K rapid updates collapse to 1 parse instead of K.
+    pendingContent = content
+    pendingLabels = labels
+    if (pendingFrame !== undefined) return
+    pendingFrame = requestAnimationFrame(() => {
+      pendingFrame = undefined
+      const next = pendingContent
+      const nextLabels = pendingLabels
+      pendingContent = undefined
+      pendingLabels = undefined
+      if (next === undefined || nextLabels === undefined) return
+      if (!container.isConnected) return
+
+      const temp = document.createElement("div")
+      temp.innerHTML = next
+      decorate(temp, nextLabels)
+
+      // neocode_change start: morphdom guard for highlighted blocks (issue #6221)
+      // During streaming, morphdom re-runs on every token. Without this guard,
+      // it would revert already-highlighted <pre> blocks back to plain code.
+      morphdom(container, temp, {
+        childrenOnly: true,
+        onBeforeElUpdated: (fromEl, toEl) => {
+          if (
+            fromEl instanceof HTMLButtonElement &&
+            toEl instanceof HTMLButtonElement &&
+            fromEl.getAttribute("data-slot") === "markdown-copy-button" &&
+            toEl.getAttribute("data-slot") === "markdown-copy-button" &&
+            fromEl.getAttribute("data-copied") === "true"
+          ) {
+            setCopyState(toEl, nextLabels, true)
           }
-          return false
-        }
-        return true
-      },
-      onBeforeNodeDiscarded: (node) => {
-        if (node instanceof Element) {
-          if (node.getAttribute("data-slot") === "markdown-copy-button") return false
-          if (node.getAttribute("data-component") === "markdown-code") return false
-        }
-        return true
-      },
-    })
-
-    if (copySetupTimer) clearTimeout(copySetupTimer)
-    copySetupTimer = setTimeout(() => {
-      if (copyCleanup) copyCleanup()
-      copyCleanup = setupCodeCopy(container, {
-        copy: i18n.t("ui.message.copy"),
-        copied: i18n.t("ui.message.copied"),
+          if (fromEl.isEqualNode(toEl)) return false
+          // neocode_change start: preserve rendered Mermaid diagrams across
+          // normal markdown morphdom refreshes so they do not flicker back to
+          // their source code while being re-rendered.
+          if (preserveMermaid(fromEl, toEl)) return false
+          // neocode_change end
+          // Preserve Shiki-highlighted blocks — don't let morphdom revert them
+          // to plain <pre><code> during streaming re-renders.
+          // Note: "shiki" class is on <pre> (set by Shiki's codeToHtml output).
+          // We compare data-source-hash (a lightweight FNV-1a hash stored by
+          // deferredHighlight on the highlighted <pre>) against a hash of the
+          // incoming code text to detect mid-stream content changes: if the code
+          // changed, we let morphdom update so the block can be re-queued for
+          // highlighting with the new content.
+          if (
+            fromEl instanceof HTMLElement &&
+            fromEl.tagName === "PRE" &&
+            fromEl.classList.contains("shiki") &&
+            toEl instanceof HTMLElement &&
+            toEl.tagName === "PRE" &&
+            !toEl.classList.contains("shiki")
+          ) {
+            const fromHash = fromEl.getAttribute("data-source-hash")
+            const toCode = toEl.querySelector("code")?.textContent ?? ""
+            if (fromHash === fnv1a(toCode)) return false
+            if (preserveStreamingHighlight(fromEl, toEl, local.streaming ?? false)) return false // neocode_change
+            // Source changed during streaming — fall through so morphdom replaces // neocode_change
+            // the stale highlighted block with the updated plain block, which will
+            // be re-highlighted on the next deferredHighlight pass.
+          }
+          return true
+        },
       })
-    }, 150)
+      // neocode_change end
+
+      kickMermaid(container, local.streaming ?? false, mermaid) // neocode_change
+      kickHighlight(container, nextLabels)
+    })
+    // neocode_change end
   })
 
+  // neocode_change start: progressive Shiki highlighting (issue #6221, PR #7102).
+  // Parser emits plain <pre><code data-lang="..."> blocks; we upgrade them to
+  // Shiki-highlighted <pre class="shiki"> here via setTimeout(0) so initial
+  // paint is instant and session switches with many code blocks don't freeze.
+  // The generation counter + abort signal cancel a previous in-flight pass
+  // when streaming tokens (or session switches) spawn a new render.
+  function kickHighlight(container: HTMLDivElement, labels: { copy: string; copied: string }) {
+    highlightState.signal.aborted = true
+    const gen = ++highlightState.gen
+    const signal = { aborted: false }
+    highlightState.signal = signal
+    void deferredHighlight(
+      container,
+      () => {
+        if (gen !== highlightState.gen) return
+        if (copyCleanup) copyCleanup()
+        copyCleanup = setupCodeCopy(container, () => labels)
+      },
+      signal,
+    )
+  }
+  // neocode_change end
+
+  // neocode_change start: Mermaid diagram rendering
+  function kickMermaid(container: HTMLDivElement, streaming: boolean, labels: MermaidLabels) {
+    mermaidState.signal.aborted = true
+    mermaidState.gen++
+    if (!hasMermaid(container)) return
+    if (streaming) return
+
+    const gen = mermaidState.gen
+    const signal = { aborted: false }
+    mermaidState.signal = signal
+    void renderMermaid(container, signal, labels).catch((err) => {
+      if (gen !== mermaidState.gen || signal.aborted) return
+      console.warn("Mermaid render failed", err)
+    })
+  }
+  // neocode_change end
+
   onCleanup(() => {
-    if (copySetupTimer) clearTimeout(copySetupTimer)
+    // neocode_change: cancel any in-flight deferredHighlight pass so its
+    // completion callback doesn't touch the unmounted DOM.
+    highlightState.signal.aborted = true
+    highlightState.gen++
+    // neocode_change start: Mermaid diagram rendering
+    mermaidState.signal.aborted = true
+    mermaidState.gen++
+    // neocode_change end
+    // neocode_change: cancel any queued rAF parse so it doesn't touch the
+    // unmounted DOM after dispose.
+    if (pendingFrame !== undefined) {
+      cancelAnimationFrame(pendingFrame)
+      pendingFrame = undefined
+      pendingContent = undefined
+      pendingLabels = undefined
+    }
     if (copyCleanup) copyCleanup()
   })
 
   return (
     <div
       data-component="markdown"
+      dir={"auto" /* neocode_change */}
       classList={{
-        ...(local.classList ?? {}),
+        ...local.classList,
         [local.class ?? ""]: !!local.class,
       }}
       ref={setRoot}

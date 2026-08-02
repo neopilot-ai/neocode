@@ -1,0 +1,47 @@
+export const dict = {
+  "neocode:autocomplete.statusBar.enabled": "$(neo-logo) オートコンプリート",
+  "neocode:autocomplete.statusBar.snoozed": "一時停止中",
+  "neocode:autocomplete.statusBar.warning": "$(warning) オートコンプリート",
+  "neocode:autocomplete.statusBar.tooltip.basic": "Neo Code オートコンプリート",
+  "neocode:autocomplete.statusBar.tooltip.disabled": "Neo Code オートコンプリート (無効)",
+  "neocode:autocomplete.statusBar.tooltip.noUsableProvider":
+    "**オートコンプリートモデルが設定されていません**\n\nオートコンプリートを有効にするには、次の対応プロバイダーのいずれかを含むプロファイルを追加してください: {{providers}}。\n\n[設定を開く]({{command}})",
+  "neocode:autocomplete.statusBar.tooltip.sessionTotal": "セッション合計コスト:",
+  "neocode:autocomplete.statusBar.tooltip.provider": "プロバイダー:",
+  "neocode:autocomplete.statusBar.tooltip.model": "モデル:",
+  "neocode:autocomplete.statusBar.tooltip.profile": "プロファイル: ",
+  "neocode:autocomplete.statusBar.tooltip.defaultProfile": "デフォルト",
+  "neocode:autocomplete.statusBar.tooltip.completionSummary":
+    "{{startTime}} から {{endTime}} までに {{count}} 件の補完を実行し、合計コストは {{cost}} でした。",
+  "neocode:autocomplete.statusBar.tooltip.providerInfo":
+    "オートコンプリートは {{provider}} 経由の {{model}} によって提供されています。",
+  "neocode:autocomplete.statusBar.cost.zero": "$0.00",
+  "neocode:autocomplete.statusBar.cost.lessThanCent": "<$0.01",
+  "neocode:autocomplete.toggleMessage": "Neo Code オートコンプリート {{status}}",
+  "neocode:autocomplete.progress.title": "Neo Code",
+  "neocode:autocomplete.progress.analyzing": "コードを解析しています...",
+  "neocode:autocomplete.progress.generating": "提案された編集を生成しています...",
+  "neocode:autocomplete.progress.processing": "提案された編集を処理しています...",
+  "neocode:autocomplete.progress.showing": "提案された編集を表示しています...",
+  "neocode:autocomplete.input.title": "Neo Code: クイックタスク",
+  "neocode:autocomplete.input.placeholder": "例: 'この関数をより効率的にリファクタリングする'",
+  "neocode:autocomplete.commands.generateSuggestions": "Neo Code: 提案された編集を生成",
+  "neocode:autocomplete.commands.displaySuggestions": "提案された編集を表示",
+  "neocode:autocomplete.commands.cancelSuggestions": "提案された編集をキャンセル",
+  "neocode:autocomplete.commands.applyCurrentSuggestion": "現在の提案された編集を適用",
+  "neocode:autocomplete.commands.applyAllSuggestions": "すべての提案された編集を適用",
+  "neocode:autocomplete.commands.category": "Neo Code",
+  "neocode:autocomplete.codeAction.title": "Neo Code: 提案された編集",
+  "neocode:autocomplete.chatParticipant.fullName": "Neo Code エージェント",
+  "neocode:autocomplete.chatParticipant.name": "エージェント",
+  "neocode:autocomplete.chatParticipant.description": "クイックタスクや提案された編集をお手伝いできます。",
+  "neocode:autocomplete.incompatibilityExtensionPopup.message":
+    "Neo Code オートコンプリートは GitHub Copilot との競合によりブロックされています。修正するには、Copilot のインライン提案を無効にする必要があります。",
+  "neocode:autocomplete.incompatibilityExtensionPopup.disableCopilot": "Copilot を無効化",
+  "neocode:autocomplete.incompatibilityExtensionPopup.disableInlineAssist": "オートコンプリートを無効化",
+  "neocode:autocomplete.creditsExhausted.message":
+    "Neo Code オートコンプリートは一時停止されました。考えられる原因: Neo アカウントに残りクレジットがない、または設定済みの API キー (BYOK) がクォータ上限に達しています。オートコンプリートを再開するには、Neo クレジットを追加するか API キー設定を確認してください。",
+  "neocode:autocomplete.creditsExhausted.addCredits": "クレジットを追加",
+  "neocode:autocomplete.authError.message":
+    "Neo Code オートコンプリートは認証の問題により一時停止されました。考えられる原因: Neo にサインインしていない、または API キー (BYOK) が無効または不足しています。再度サインインするか、プロバイダーの API キー設定を確認してください。",
+}

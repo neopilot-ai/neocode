@@ -1,280 +1,342 @@
-# Contributing to NeoCode
+# Contributing to Neo CLI
 
-We want to make it easy for you to contribute to NeoCode. Here are the most common type of changes that get merged:
+See [the Documentation for details on contributing](https://neo.khulnasoft.com/docs/contributing).
 
-- Bug fixes
-- Additional LSPs / Formatters
-- Improvements to LLM performance
-- Support for new providers
-- Fixes for environment-specific quirks
-- Missing standard behavior
-- Documentation improvements
+## TL;DR
 
-However, any UI or core product feature must go through a design review with the core team before implementation.
+There are lots of ways to contribute to the project:
 
-If you are unsure if a PR would be accepted, feel free to ask a maintainer or look for issues with any of the following labels:
+- **Code Contributions:** Implement new features or fix bugs
+- **Documentation:** Improve existing docs or create new guides
+- **Bug Reports:** Report issues you encounter
+- **Feature Requests:** Suggest new features or improvements
+- **Community Support:** Help other users in the community
 
-- [`help wanted`](https://github.com/neopilot-ai/neocode/issues?q=is%3Aissue%20state%3Aopen%20label%3Ahelp-wanted)
-- [`good first issue`](https://github.com/neopilot-ai/neocode/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22good%20first%20issue%22)
-- [`bug`](https://github.com/neopilot-ai/neocode/issues?q=is%3Aissue%20state%3Aopen%20label%3Abug)
-- [`perf`](https://github.com/neopilot-ai/neocode/issues?q=is%3Aopen%20is%3Aissue%20label%3A%22perf%22)
+The Neo Community is [on Discord](https://neo.khulnasoft.com/discord).
 
-> [!NOTE]
-> PRs that ignore these guardrails will likely be closed.
+## Prerequisites
 
-Want to take on an issue? Leave a comment and a maintainer may assign it to you unless it is something we are already working on.
+- **Bun 1.3.14+** — required for all packages.
+- **Java 21** — required by the JetBrains plugin. The root `bun turbo typecheck` and `bun turbo test:ci` commands include `@neocode/neo-jetbrains` and will fail without Java 21.
 
-## Developing NeoCode
+  The preferred way to install Java is via [SDKMAN](https://sdkman.io/install):
 
-- Requirements: Bun 1.3+
-- Install dependencies and start the dev server from the repo root:
+  ```bash
+  # Install SDKMAN (if not already installed)
+  curl -s "https://get.sdkman.io" | bash
+
+  # Install and activate Java 21 (Eclipse Temurin)
+  sdk install java 21-tem
+  sdk use java 21-tem
+
+  # Verify
+  java -version
+  ```
+
+  If you don't plan to work on the JetBrains plugin, you can still run non-JetBrains checks directly:
+
+  ```bash
+  bun turbo typecheck --filter=!@neocode/neo-jetbrains
+  ```
+
+## Developing Neo CLI
+
+- **Requirements:** Bun 1.3.14+, Java 21 (see [Prerequisites](#prerequisites) above)
+- Install dependencies and start the CLI from the repo root:
 
   ```bash
   bun install
   bun dev
   ```
 
+  `bun dev` and `bun run dev` both run the local CLI. For the VS Code extension, use `bun run extension`.
+
+## Common Checks
+
+From the repo root:
+
+```bash
+bun install
+bun run lint
+bun run typecheck
+```
+
+`bun run typecheck` wraps `bun turbo typecheck`. Use `bun turbo typecheck --force` if you need to bypass the Turbo cache.
+
+Do **not** run `bun test` from the repo root. The root test script intentionally exits with failure so tests run from the package that owns them.
+
+### CLI checks
+
+From `packages/opencode/`:
+
+```bash
+bun run typecheck
+bun test
+bun test ./path/to/file.test.ts
+```
+
+For backend/API validation, see [`TESTING.md`](./TESTING.md). It covers starting the local backend with `bun dev serve` and making `curl` requests against it. After changing server endpoints in `packages/opencode/src/server/`, run `./script/generate.ts` from the repo root to regenerate `packages/sdk/js/`.
+
+### VS Code extension checks
+
+From `packages/neo-vscode/`:
+
+```bash
+bun run typecheck
+bun run lint
+bun run test:unit
+bun run test
+bun run compile
+bun run package
+```
+
+### Documentation checks
+
+From the repo root:
+
+```bash
+bun run --filter @neocode/neo-docs test
+bun run --filter @neocode/neo-docs build
+bun run --filter @neocode/neo-docs dev
+```
+
+For manual docs validation, run the docs site locally, preview the affected page, and check changed links and rendered content.
+
+### Guardrails
+
+- User-facing changes usually need a changeset (`bunx changeset add` or a file under `.changeset/`).
+- After changing server endpoints, regenerate the SDK with `./script/generate.ts`.
+- After adding or changing guarded URLs in `packages/neo-vscode/`, `packages/neo-vscode/webview-ui/`, or `packages/opencode/src/`, run `bun run script/extract-source-links.ts` from the repo root.
+- When editing shared `packages/opencode/` files, keep Neo changes small and mark Neo-only edits with `// neocode_change` for a single line or `// neocode_change start` / `// neocode_change end` for a block. Do not add these markers inside `neocode`-named paths.
+
+### Developing the VS Code Extension
+
+Build and launch the extension in an isolated VS Code instance:
+
+```bash
+bun run extension        # Build + launch in dev mode
+```
+
+This auto-detects VS Code on macOS, Linux, and Windows. Override with `--app-path PATH` or `VSCODE_EXEC_PATH`. Use `--insiders` to prefer Insiders, `--workspace PATH` to open a specific folder, or `--clean` to reset cached state.
+
+### Developing the JetBrains Plugin
+
+Requires Java 21 (see [Prerequisites](#prerequisites)). From `packages/neo-jetbrains/`:
+
+```bash
+./gradlew typecheck    # Compile-check all Kotlin sources
+./gradlew test         # Run all tests (backend + frontend)
+./gradlew --no-configuration-cache runIdeSplitMode  # Launch local split-mode sandbox; backend downloads the pinned CLI
+```
+
+Use `./gradlew runIde` only for a monolithic sandbox. JetBrains dev runs do not build or bundle CLI binaries; the backend downloads the pinned release at connect time.
+
+Or via the root turbo filter to run only JetBrains checks from the repo root:
+
+```bash
+bun turbo typecheck --filter=@neocode/neo-jetbrains
+bun turbo test:ci --filter=@neocode/neo-jetbrains
+```
+
 ### Running against a different directory
 
-By default, `bun dev` runs NeoCode in the `packages/neocode` directory. To run it against a different directory or repository:
+By default, `bun dev` runs Neo CLI in the `packages/opencode` directory. To run it against a different directory or repository:
 
 ```bash
 bun dev <directory>
 ```
 
-To run NeoCode in the root of the neocode repo itself:
+To run Neo CLI in the root of the repo itself:
 
 ```bash
 bun dev .
 ```
 
-### Building a "localcode"
+### Running Neo CLI from any folder
+
+`bin/neodev` is a self-locating launcher that runs this checkout from wherever you invoke it. Running it with no arguments launches the TUI pointed at the caller's directory; any arguments are forwarded to the CLI unchanged.
+
+One-shot install (recommended). From the repo root:
+
+```bash
+./bin/neodev dev-setup
+```
+
+This detects your shell, shows exactly what it will add, asks for confirmation, writes an idempotent block to your rc file, and saves a timestamped backup of the original. Re-running is safe — it only rewrites when the snippet has changed.
+
+Useful flags:
+
+- `--yes` — skip the confirmation prompt (good for CI/containers).
+- `--print` — just print the snippet, don't touch any file (pipe-friendly).
+- `--dry-run` — show what would change without writing.
+- `--shell <zsh|bash|fish|powershell>` — override shell detection.
+- `--rc <path>` — override the rc file.
+
+Manual alternatives (equivalent, no CLI invocation needed):
+
+- Unix: add `alias neodev='/path/to/neocode/bin/neodev'` to `~/.zshrc` / `~/.bashrc`, or `fish_add_path /path/to/neocode/bin`.
+- Windows: add `C:\path\to\neocode\bin` to PATH (System Environment Variables), or add `function neodev { & "C:\path\to\neocode\bin\neodev.cmd" @args }` to `$PROFILE`.
+
+Then from anywhere:
+
+```bash
+cd ~/some/project
+neodev                      # opens TUI with project = ~/some/project
+neodev dev-setup --print    # prints the alias line (scripting)
+neodev run --dir "$PWD" "…" # subcommands pass through; use --dir for run/serve
+```
+
+### Building a "local" binary
 
 To compile a standalone executable:
 
 ```bash
-./packages/neocode/script/build.ts --single
+./packages/opencode/script/build.ts --single
 ```
 
 Then run it with:
 
 ```bash
-./packages/neocode/dist/neocode-<platform>/bin/neocode
+./packages/opencode/dist/@neocode/cli-<platform>/bin/neo
 ```
 
 Replace `<platform>` with your platform (e.g., `darwin-arm64`, `linux-x64`).
 
-- Core pieces:
-  - `packages/neocode`: NeoCode core business logic & server.
-  - `packages/neocode/src/cli/cmd/tui/`: The TUI code, written in SolidJS with [opentui](https://github.com/sst/opentui)
-  - `packages/app`: The shared web UI components, written in SolidJS
-  - `packages/desktop`: The native desktop app, built with Tauri (wraps `packages/app`)
-  - `packages/plugin`: Source for `@neocode-ai/plugin`
+### Understanding bun dev vs neo
 
-### Understanding bun dev vs neocode
-
-During development, `bun dev` is the local equivalent of the built `neocode` command. Both run the same CLI interface:
+During development, `bun dev` is the local equivalent of the built `neo` command. Both run the same CLI interface:
 
 ```bash
 # Development (from project root)
 bun dev --help           # Show all available commands
 bun dev serve            # Start headless API server
-bun dev web              # Start server + open web interface
-bun dev <directory>      # Start TUI in specific directory
 
 # Production
-neocode --help          # Show all available commands
-neocode serve           # Start headless API server
-neocode web             # Start server + open web interface
-neocode <directory>     # Start TUI in specific directory
+neo --help          # Show all available commands
+neo serve           # Start headless API server
 ```
 
-### Running the API Server
+### Testing with a local backend
 
-To start the NeoCode headless API server:
+To point the CLI at a local backend (e.g., a locally running Neo API server on port 3000), set the `NEO_API_URL` environment variable:
 
 ```bash
-bun dev serve
+NEO_API_URL=http://localhost:3000 bun dev
 ```
 
-This starts the headless server on port 4096 by default. You can specify a different port:
+This redirects all gateway traffic (auth, model listing, provider routing, profile, etc.) to your local server. The default is `https://api.neo.khulnasoft.com`.
 
-```bash
-bun dev serve --port 8080
-```
+There are also optional overrides for other services:
 
-### Running the Web App
+| Variable | Default | Purpose |
+|---|---|---|
+| `NEO_API_URL` | `https://api.neo.khulnasoft.com` | Neo API (gateway, auth, models, profile) |
+| `NEO_SESSION_INGEST_URL` | `https://ingest.neosessions.ai` | Session export / cloud sync |
+| `NEO_MODELS_URL` | `https://models.dev` | Model metadata |
 
-To test UI changes during development:
+> **VS Code:** The repo includes a "VSCode - Run Extension (Local Backend)" launch config in `.vscode/launch.json` that sets `NEO_API_URL=http://localhost:3000` automatically.
 
-1. **First, start the NeoCode server** (see [Running the API Server](#running-the-api-server) section above)
-2. **Then run the web app:**
+## Issue Template Requirements
 
-```bash
-bun run --cwd packages/app dev
-```
+If you open an issue through the GitHub web UI, GitHub will guide you through the correct template automatically.
 
-This starts a local dev server at http://localhost:5173 (or similar port shown in output). Most UI changes can be tested here, but the server must be running for full functionality.
+If you open an issue through `gh issue create`, the API, or another tool that bypasses the web UI, include the equivalent required fields yourself so the issue still matches the template. Issues that skip required fields may be auto-closed by the compliance bot.
 
-### Running the Desktop App
+Current required fields by issue type:
 
-The desktop app is a native Tauri application that wraps the web UI.
-
-To run the native desktop app:
-
-```bash
-bun run --cwd packages/desktop tauri dev
-```
-
-This starts the web dev server on http://localhost:1420 and opens the native window.
-
-If you only want the web dev server (no native shell):
-
-```bash
-bun run --cwd packages/desktop dev
-```
-
-To create a production `dist/` and build the native app bundle:
-
-```bash
-bun run --cwd packages/desktop tauri build
-```
-
-This runs `bun run --cwd packages/desktop build` automatically via Tauri’s `beforeBuildCommand`.
-
-> [!NOTE]
-> Running the desktop app requires additional Tauri dependencies (Rust toolchain, platform-specific libraries). See the [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/) for setup instructions.
-
-> [!NOTE]
-> If you make changes to the API or SDK (e.g. `packages/neocode/src/server/server.ts`), run `./script/generate.ts` to regenerate the SDK and related files.
-
-Please try to follow the [style guide](./AGENTS.md)
-
-### Setting up a Debugger
-
-Bun debugging is currently rough around the edges. We hope this guide helps you get set up and avoid some pain points.
-
-The most reliable way to debug NeoCode is to run it manually in a terminal via `bun run --inspect=<url> dev ...` and attach
-your debugger via that URL. Other methods can result in breakpoints being mapped incorrectly, at least in VSCode (YMMV).
-
-Caveats:
-
-- If you want to run the NeoCode TUI and have breakpoints triggered in the server code, you might need to run `bun dev spawn` instead of
-  the usual `bun dev`. This is because `bun dev` runs the server in a worker thread and breakpoints might not work there.
-- If `spawn` does not work for you, you can debug the server separately:
-  - Debug server: `bun run --inspect=ws://localhost:6499/ --cwd packages/neocode ./src/index.ts serve --port 4096`,
-    then attach TUI with `neocode attach http://localhost:4096`
-  - Debug TUI: `bun run --inspect=ws://localhost:6499/ --cwd packages/neocode --conditions=browser ./src/index.ts`
-
-Other tips and tricks:
-
-- You might want to use `--inspect-wait` or `--inspect-brk` instead of `--inspect`, depending on your workflow
-- Specifying `--inspect=ws://localhost:6499/` on every invocation can be tiresome, you may want to `export BUN_OPTIONS=--inspect=ws://localhost:6499/` instead
-
-#### VSCode Setup
-
-If you use VSCode, you can use our example configurations [.vscode/settings.example.json](.vscode/settings.example.json) and [.vscode/launch.example.json](.vscode/launch.example.json).
-
-Some debug methods that can be problematic:
-
-- Debug configurations with `"request": "launch"` can have breakpoints incorrectly mapped and thus unusable
-- The same problem arises when running NeoCode in the VSCode `JavaScript Debug Terminal`
-
-With that said, you may want to try these methods, as they might work for you.
+- **Bug report:** include a `Description`. When you can, also add Plugins, Neo version, Steps to reproduce, Screenshot and/or share link, Operating System, and Terminal so the report matches the full bug template.
+- **Feature request:** use a title prefixed with `[FEATURE]:`, complete the required checkbox confirming you have searched for duplicates, and fill in `Describe the enhancement you want to request`.
+- **Question:** include the `Question` field.
 
 ## Pull Request Expectations
 
-### Issue First Policy
+Contributor guidance exists to protect maintainer review time and keep reviews focused on work that is ready to evaluate.
 
-**All PRs must reference an existing issue.** Before opening a PR, open an issue describing the bug or feature. This helps maintainers triage and prevents duplicate work. PRs without a linked issue may be closed without review.
+- **UI Changes:** Include screenshots or videos (before/after).
+- **Logic Changes:** Explain how you verified it works.
 
-- Use `Fixes #123` or `Closes #123` in your PR description to link the issue
-- For small fixes, a brief issue is fine - just enough context for maintainers to understand the problem
+### Contribution Ownership and AI Assistance
 
-### General Requirements
+AI and coding agents are allowed, but contributors own the work they submit. Before requesting review, make sure you personally understand the change, have tested it appropriately, can explain the diff, and understand how it interacts with the affected packages and the rest of the repo.
 
-- Keep pull requests small and focused
-- Explain the issue and why your change fixes it
-- Before adding new functionality, ensure it doesn't already exist elsewhere in the codebase
+If you use an agent, start it from the repo root so the root `AGENTS.md` is available. When your change touches a package with its own guidance, read and follow that package's `AGENTS.md` or contributor docs too.
 
-### UI Changes
+Maintainers may close PRs that appear to be submitted without credible contributor ownership or understanding, including AI-assisted work that the contributor cannot explain or has not meaningfully reviewed.
 
-If your PR includes UI changes, please include screenshots or videos showing the before and after. This helps maintainers review faster and gives you quicker feedback.
+### Tracker Use and Automation
 
-### Logic Changes
+Do not submit batches of agent-generated, untested, or weakly reviewed PRs.
 
-For non-UI changes (bug fixes, new features, refactors), explain **how you verified it works**:
+Please keep concurrent PRs focused and limited. As a rule, open no more than three PRs at a time, especially if you are a new contributor. Prioritize high-impact or high-priority issues first instead of opening many speculative fixes. If a contributor opens a large batch of low-value or duplicative PRs, maintainers may close the batch and ask the contributor to choose one PR to reopen, focus, and bring up to the documented review bar before submitting more.
 
-- What did you test?
-- How can a reviewer reproduce/confirm the fix?
+For issues, do not mass-create tickets through automation or agents. Search existing issues first, open issues only when you have enough context for someone to act, and prioritize the most important reports instead of filing every possible finding. Maintainers may close duplicate, low-signal, automated, or weakly reviewed issues without action.
 
-### No AI-Generated Walls of Text
+Repeated disregard of this contribution guide, or high-volume automated or agent-generated tracker spam across issues or PRs, may result in maintainers blocking the responsible account.
 
-Long, AI-generated PR descriptions and issues are not acceptable and may be ignored. Respect the maintainers' time:
+### Bug Bounties
 
-- Write short, focused descriptions
-- Explain what changed and why in your own words
-- If you can't explain it briefly, your PR might be too large
+Neo has bug bounties. To be eligible, make sure your GitHub account is connected in your Neo account.
 
-### PR Titles
+### Testing Evidence
 
-PR titles should follow conventional commit standards:
+Every PR marked ready for review must include testing evidence. A bare `Not tested` or `N/A` answer is not sufficient.
 
-- `feat:` new feature or functionality
-- `fix:` bug fix
-- `docs:` documentation or README changes
-- `chore:` maintenance tasks, dependency updates, etc.
-- `refactor:` code refactoring without changing behavior
-- `test:` adding or updating tests
+Choose checks that match the files touched. Include command results and manual/local verification; for visual CLI or extension changes, include screenshots or videos. Docs-only, config-only, and similar changes still need concrete evidence, such as a relevant command check or preview.
 
-You can optionally include a scope to indicate which package is affected:
+If you cannot complete a relevant command, include all of the following in the PR:
 
-- `feat(app):` feature in the app package
-- `fix(desktop):` bug fix in the desktop package
-- `chore(neocode):` maintenance in the neocode package
+- The command you attempted or would normally run
+- The blocker or failure that prevented completion
+- The substitute verification you performed instead
 
-Examples:
+See [Testing Evidence for Pull Requests](packages/neo-docs/pages/contributing/development-environment.md#testing-evidence-for-pull-requests) for more examples. Agent limitations, local resource constraints, OOM constraints, or an agent prompt that says to skip tests do not waive this requirement. Draft PRs may be incomplete until they are marked ready for review. Maintainers may still defer or close review at their discretion.
 
-- `docs: update contributing guidelines`
-- `fix: resolve crash on startup`
-- `feat: add dark mode support`
-- `feat(app): add dark mode support`
-- `fix(desktop): resolve crash on startup`
-- `chore: bump dependency versions`
+Our issue-first policy asks contributors to reference an existing issue when opening a PR. This helps reviewers understand the problem statement, discussion, and intended scope before reviewing the code change.
 
-### Style Preferences
+A review-ready PR description should explain:
 
-These are not strictly enforced, they are just general guidelines:
+- What problem is being solved
+- Why the change is needed
+- Important implementation choices or tradeoffs reviewers cannot infer from the diff
+- How the change was tested or verified
 
-- **Functions:** Keep logic within a single function unless breaking it out adds clear reuse or composition benefits.
+Keep the description focused on context reviewers cannot infer from the diff. Skip file-by-file summaries, placeholders, and other filler.
 
-## Security
+For visual UI changes, include screenshots or video showing the relevant before/after or resulting state.
 
-### Reporting Security Issues
+Maintainers may close or decline review of PRs presented as review-ready at their discretion when they lack:
 
-If you discover a security vulnerability, please **do not open a public issue**. Instead, send an email to **security@neocode.ai**. See our [Security Policy](SECURITY.md) for details.
+- Linked issue context
+- A clear what/why explanation
+- Credible testing evidence
+- Credible contributor ownership of AI-assisted work
+- Relevant UI proof for visual UI changes
 
-### Security Best Practices for Contributors
+When a PR is close to this bar, addresses important work, or would benefit from further shaping, maintainers may ask for specific fixes instead of closing or declining review. Contributors may reopen or resubmit once the PR meets the documented bar.
 
-- Validate all user inputs with Zod schemas
-- Follow principle of least privilege
-- Review permission implications of changes
-- Keep dependencies updated
-- Add tests for security-critical code
+## PR Titles
 
-### Security Review Process
+Use conventional commit style PR titles such as:
 
-- All security-related changes require additional review
-- Automated security scans run on all PRs
-- Breaking changes to security features need maintainer approval
-- **Destructuring:** Do not do unnecessary destructuring of variables.
-- **Control flow:** Avoid `else` statements.
-- **Error handling:** Prefer `.catch(...)` instead of `try`/`catch` when possible.
-- **Types:** Reach for precise types and avoid `any`.
-- **Variables:** Stick to immutable patterns and avoid `let`.
-- **Naming:** Choose concise single-word identifiers when they remain descriptive.
-- **Runtime APIs:** Use Bun helpers such as `Bun.file()` when they fit the use case.
+- `feat: add MCP settings tab`
+- `fix: correct Windows path handling`
+- `docs: clarify issue template requirements`
+- `chore: bump TypeScript to 5.8`
+- `refactor: extract diff renderer into a hook`
+- `test: cover ServerManager orphan cleanup`
 
-## Feature Requests
+## Issue and PR Lifecycle
 
-For net-new functionality, start with a design conversation. Open an issue describing the problem, your proposed approach (optional), and why it belongs in NeoCode. The core team will help decide whether it should move forward; please wait for that approval instead of opening a feature PR directly.
+To keep our backlog manageable, we automatically close inactive issues and PRs after a period of inactivity. This isn't a judgment on quality — older items tend to lose context over time and we'd rather start fresh if they're still relevant. Feel free to reopen or create a new issue/PR if you're still working on something!
+
+Maintainers may also close issues or PRs that disregard the contribution guide, bypass required context, or lack credible contributor ownership of AI-assisted work.
+
+## Style Preferences
+
+- **Functions:** Keep logic within a single function unless breaking it out adds clear reuse.
+- **Destructuring:** Avoid unnecessary destructuring.
+- **Control flow:** Avoid `else` statements; prefer early returns.
+- **Types:** Avoid `any`.
+- **Variables:** Prefer `const`.
+- **Naming:** Concise single-word identifiers when descriptive.
+- **Runtime APIs:** Use Bun helpers (e.g., `Bun.file()`).
